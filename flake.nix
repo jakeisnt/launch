@@ -28,6 +28,21 @@
 
     # Our supported systems are the same supported systems as the Zig binaries
     systems = builtins.attrNames inputs.zig.packages;
+
+
+    gyro = nixpkgs.mkDerivation rec {
+      pname = "gyro";
+      version = "0.7.0";
+      src = builtins.fetchurl {
+        url = "https://github.com/mattnite/gyro/releases/download/${version}/gyro-${version}-linux-x86_64.tar.gz";
+        sha256 = "1wnv15y5ccwqnbsr93npf31g9r7pjlqzmbl4q217gzyfvz6l3gdd";
+      };
+
+      # nativeBuildInputs = [ autoPatchelfHook ];
+      installPhase = ''
+        install -m755 -D gyro $out/bin/gyro
+      '';
+    };
   in
     flake-utils.lib.eachSystem systems (
       system: let
@@ -37,6 +52,7 @@
         devShells.default = pkgs.mkShell {
           nativeBuildInputs = with pkgs; [
             zigpkgs.master
+            gyro
           ];
         };
 
