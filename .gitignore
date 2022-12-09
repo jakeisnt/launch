@@ -3,3 +3,4 @@ zig-out/
 
 .zigmod
 deps.zig
+result

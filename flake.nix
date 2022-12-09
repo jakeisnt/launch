@@ -2,9 +2,10 @@
   description = "An empty project that uses Zig.";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/release-22.05";
-    flake-utils.url = "github:numtide/flake-utils";
-    zig.url = "github:mitchellh/zig-overlay";
+    nixpkgs.url     = github:nixos/nixpkgs/release-22.05;
+    flake-utils.url = github:numtide/flake-utils;
+    zig.url         = github:mitchellh/zig-overlay;
+    gyro.url        = github:jakeisnt/gyro;
 
     # Used for shell.nix
     flake-compat = {
@@ -23,6 +24,7 @@
       # Other overlays
       (final: prev: {
         zigpkgs = inputs.zig.packages.${prev.system};
+        gyro = inputs.gyro.packages.${prev.system}.default;
       })
     ];
 
@@ -38,18 +40,7 @@
         devShells.default = pkgs.mkShell {
           nativeBuildInputs = with pkgs; [
             zigpkgs.master
-
-            (with import nixpkgs; stdenv.mkDerivation rec {
-              pname = "gyro";
-              version = "0.7.0";
-              src = builtins.fetchurl {
-                url = "https://github.com/mattnite/gyro/releases/download/${version}/gyro-${version}-linux-x86_64.tar.gz";
-                sha256 = "1wnv15y5ccwqnbsr93npf31g9r7pjlqzmbl4q217gzyfvz6l3gdd";
-              };
-              installPhase = ''
-                install -m755 -D gyro $out/bin/gyro
-              '';
-            })
+            pkgs.gyro
           ];
         };
 
