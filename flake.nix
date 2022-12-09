@@ -42,6 +42,15 @@
             zigpkgs.master
             pkgs.gyro
           ];
+
+          buildInputs = with pkgs; [
+            wayland-protocols
+            wlroots
+            pixman
+            libxkbcommon
+            libevdev
+            pkg-config
+          ];
         };
 
         # For compatibility with older versions of the `nix` binary
