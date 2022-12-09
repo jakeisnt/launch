@@ -50,7 +50,12 @@
             libxkbcommon
             libevdev
             pkg-config
+
+            cairo
+            pango
           ];
+
+          LD_LIBRARY_PATH = "${pkgs.lib.makeLibraryPath (with pkgs; [cairo pango pixman ])}:$LD_LIBRARY_PATH";
         };
 
         # For compatibility with older versions of the `nix` binary
