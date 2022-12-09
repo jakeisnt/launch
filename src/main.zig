@@ -1,20 +1,24 @@
 const std = @import("std");
-const capy = @import("capy");
-
-// This is required for your app to build to WebAssembly and other particular architectures
-pub usingnamespace capy.cross_platform;
 
 pub fn main() !void {
-    try capy.backend.init();
-    
-    var window = try capy.Window.init();
-    try window.set(
-        capy.Label(.{ .text = "Hello, World" })
-    );
-    
-    window.setTitle("Hello");
-    window.resize(250, 100);
-    window.show();
-    
-    capy.runEventLoop();
+    // Prints to stderr (it's a shortcut based on `std.io.getStdErr()`)
+    std.debug.print("All your {s} are belong to us.\n", .{"codebase"});
+
+    // stdout is for the actual output of your application, for example if you
+    // are implementing gzip, then only the compressed bytes should be sent to
+    // stdout, not any debugging messages.
+    const stdout_file = std.io.getStdOut().writer();
+    var bw = std.io.bufferedWriter(stdout_file);
+    const stdout = bw.writer();
+
+    try stdout.print("Run `zig build test` to run the tests.\n", .{});
+
+    try bw.flush(); // don't forget to flush!
+}
+
+test "simple test" {
+    var list = std.ArrayList(i32).init(std.testing.allocator);
+    defer list.deinit(); // try commenting this out and see if zig detects the memory leak!
+    try list.append(42);
+    try std.testing.expectEqual(@as(i32, 42), list.pop());
 }
