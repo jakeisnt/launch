@@ -79,22 +79,31 @@ pub fn main() void {
     _ = c.xcb_flush(conn);
 
     // render loop
-    var toggle: bool = true;
+    // var toggle: bool = true;
     while (true) {
-        if (toggle) {
-            c.cairo_set_source_rgb(ctx, 1.0, 0.65, 0); // orange
-        } else {
-            c.cairo_set_source_rgb(ctx, 0, 0, 0); // black
-        }
-        toggle = !toggle;
+        // if (toggle) {
+        c.cairo_set_source_rgb(ctx, 1.0, 0.65, 0); // orange
+        // } else {
+        //     c.cairo_set_source_rgb(ctx, 0, 0, 0); // black
+        // }
+        // toggle = !toggle;
 
         c.cairo_paint(ctx);
 
         // ctx here: "may not be defined!"
 
-        if (ctx) {
-            write_text(ctx);
-        }
+        // write_text {
+        var te: c.cairo_text_extents_t = undefined;
+        c.cairo_text_extents(ctx, "a", &te);
+
+        c.cairo_set_source_rgb(ctx, 0.0, 0.0, 0.0); // black
+        c.cairo_select_font_face(ctx, "Georgia", c.CAIRO_FONT_SLANT_NORMAL, c.CAIRO_FONT_WEIGHT_BOLD);
+        c.cairo_set_font_size(ctx, 20.0);
+        c.cairo_move_to(ctx, 0.5 - te.width / 2 - te.x_bearing, 0.5 - te.height / 2 - te.y_bearing);
+        c.cairo_show_text(ctx, "test text message");
+
+        // return cr;
+        // }
 
         c.cairo_surface_flush(surf);
         _ = c.xcb_flush(conn);
