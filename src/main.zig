@@ -79,34 +79,32 @@ pub fn main() void {
     _ = c.xcb_flush(conn);
 
     // render loop
-    // var toggle: bool = true;
+    var toggle: bool = true;
     while (true) {
-        // if (toggle) {
-        c.cairo_set_source_rgb(ctx, 1.0, 0.65, 0); // orange
-        // } else {
-        //     c.cairo_set_source_rgb(ctx, 0, 0, 0); // black
-        // }
-        // toggle = !toggle;
+        if (toggle) {
+            std.debug.print("toggle on", .{});
 
-        c.cairo_paint(ctx);
+            c.cairo_set_source_rgb(ctx, 1.0, 0.65, 0); // orange
 
-        // ctx here: "may not be defined!"
-
-        // write_text {
-        var te: c.cairo_text_extents_t = undefined;
-        c.cairo_text_extents(ctx, "a", &te);
-
-        c.cairo_set_source_rgb(ctx, 0.0, 0.0, 0.0); // black
-        c.cairo_select_font_face(ctx, "Georgia", c.CAIRO_FONT_SLANT_NORMAL, c.CAIRO_FONT_WEIGHT_BOLD);
-        c.cairo_set_font_size(ctx, 20.0);
-        c.cairo_move_to(ctx, 0.5 - te.width / 2 - te.x_bearing, 0.5 - te.height / 2 - te.y_bearing);
-        c.cairo_show_text(ctx, "test text message");
-
-        // return cr;
-        // }
+            // write_text {
+            var te: c.cairo_text_extents_t = undefined;
+            c.cairo_text_extents(ctx, "a", &te);
+            // c.cairo_set_source_rgb(ctx, 0.0, 0.0, 0.0); // black
+            c.cairo_select_font_face(ctx, "Georgia", c.CAIRO_FONT_SLANT_NORMAL, c.CAIRO_FONT_WEIGHT_BOLD);
+            c.cairo_set_font_size(ctx, 20.0);
+            c.cairo_move_to(ctx, 0.5 - te.width / 2 - te.x_bearing, 0.5 - te.height / 2 - te.y_bearing);
+            c.cairo_show_text(ctx, "test text message");
+            // return cr;
+            // }
+        } else {
+            std.debug.print("toggle off", .{});
+            c.cairo_set_source_rgb(ctx, 0, 0, 0); // black
+            c.cairo_paint(ctx);
+        }
+        toggle = !toggle;
 
         c.cairo_surface_flush(surf);
         _ = c.xcb_flush(conn);
-        std.time.sleep(1e9);
+        std.time.sleep(5e8);
     }
 }
