@@ -29,8 +29,8 @@ pub fn lookup_visual(s: *c.xcb_screen_t, visual: c.xcb_visualid_t) ?*c.xcb_visua
     return null;
 }
 
-pub fn write_text(cr: *c.cairo_t) void {
-    var te: c.cairo_text_extents_t;
+pub fn write_text(cr: *c.cairo_t) *c.cairo_t {
+    var te: c.cairo_text_extents_t = undefined;
     c.cairo_text_extents(cr, "a", &te);
 
     c.cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
@@ -38,6 +38,8 @@ pub fn write_text(cr: *c.cairo_t) void {
     c.cairo_set_font_size(cr, 1.2);
     c.cairo_move_to(cr, 0.5 - te.width / 2 - te.x_bearing, 0.5 - te.height / 2 - te.y_bearing);
     c.cairo_show_text(cr, "a");
+
+    return cr;
 }
 
 pub fn main() void {
@@ -88,7 +90,11 @@ pub fn main() void {
 
         c.cairo_paint(ctx);
 
-        write_text(ctx);
+        // ctx here: "may not be defined!"
+
+        if (ctx) {
+            write_text(ctx);
+        }
 
         c.cairo_surface_flush(surf);
         _ = c.xcb_flush(conn);

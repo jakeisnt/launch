@@ -53,6 +53,7 @@
 
             cairo
             pango
+            zls
           ];
 
           LD_LIBRARY_PATH = "${pkgs.lib.makeLibraryPath (with pkgs; [cairo pango pixman ])}:$LD_LIBRARY_PATH";
