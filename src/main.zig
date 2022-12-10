@@ -29,6 +29,17 @@ pub fn lookup_visual(s: *c.xcb_screen_t, visual: c.xcb_visualid_t) ?*c.xcb_visua
     return null;
 }
 
+pub fn write_text(cr: *c.cairo_t) void {
+    var te: c.cairo_text_extents_t;
+    c.cairo_text_extents(cr, "a", &te);
+
+    c.cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+    c.cairo_select_font_face(cr, "Georgia", c.CAIRO_FONT_SLANT_NORMAL, c.CAIRO_FONT_WEIGHT_BOLD);
+    c.cairo_set_font_size(cr, 1.2);
+    c.cairo_move_to(cr, 0.5 - te.width / 2 - te.x_bearing, 0.5 - te.height / 2 - te.y_bearing);
+    c.cairo_show_text(cr, "a");
+}
+
 pub fn main() void {
     var display: ?[*]const u8 = null;
     var screen: ?[*]c_int = null;
@@ -74,7 +85,11 @@ pub fn main() void {
             c.cairo_set_source_rgb(ctx, 0, 0, 0); // black
         }
         toggle = !toggle;
+
         c.cairo_paint(ctx);
+
+        write_text(ctx);
+
         c.cairo_surface_flush(surf);
         _ = c.xcb_flush(conn);
         std.time.sleep(1e9);
