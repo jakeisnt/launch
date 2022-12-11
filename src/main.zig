@@ -88,42 +88,6 @@ pub fn main() !void {
         .a = 0xFF,
     };
 
-    // as TTF_RenderText_Solid could only be used on
-    // SDL_Surface then you have to create the surface first
-    var surfaceMessage: *c.SDL_Surface =
-        c.TTF_RenderText_Solid(Sans, "Test text!", Color);
-
-    // now you can convert it into a texture
-    var Message: *c.SDL_Texture = c.SDL_CreateTextureFromSurface(renderer, surfaceMessage) orelse {
-        c.SDL_Log("Unable to create font texture from surface: %s", c.SDL_GetError());
-        return error.SDLInitializationFailed;
-    };
-
-    var Message_rect: c.SDL_Rect = undefined; //create a rect
-    Message_rect.x = 0; //controls the rect's x coordinate
-    Message_rect.y = 0; // controls the rect's y coordinte
-    Message_rect.w = 100; // controls the width of the rect
-    Message_rect.h = 100; // controls the height of the rect
-
-    // (0,0) is on the top left of the window/screen,
-    // think a rect as the text's box,
-    // that way it would be very simple to understand
-
-    // Now since it's a texture, you have to put RenderCopy
-    // in your game loop area, the area where the whole code executes
-
-    // you put the renderer's name first, the Message,
-    // the crop size (you can ignore this if you don't want
-    // to dabble with cropping), and the rect which is the size
-    // and coordinate of your texture
-
-    // Need to assign all non-void values to null
-    _ = c.SDL_RenderCopy(renderer, Message, null, &Message_rect);
-
-    // Don't forget to free your surface and texture
-    defer c.SDL_FreeSurface(surfaceMessage);
-    defer c.SDL_DestroyTexture(Message);
-
     var quit = false;
     while (!quit) {
         var event: c.SDL_Event = undefined;
@@ -147,8 +111,49 @@ pub fn main() !void {
             }
         }
 
+        // should be text.items
+        // https://forums.libsdl.org/viewtopic.php?p=37317 ??? does this help?
+        var messageText = try text.toConstSlice();
+
+        // as TTF_RenderText_Solid could only be used on
+        // SDL_Surface then you have to create the surface first
+        var surfaceMessage: *c.SDL_Surface =
+            c.TTF_RenderText_Solid(Sans, messageText, Color);
+
+        // now you can convert it into a texture
+        var Message: *c.SDL_Texture = c.SDL_CreateTextureFromSurface(renderer, surfaceMessage) orelse {
+            c.SDL_Log("Unable to create font texture from surface: %s", c.SDL_GetError());
+            return error.SDLInitializationFailed;
+        };
+
+        var Message_rect: c.SDL_Rect = undefined; //create a rect
+        Message_rect.x = 0; //controls the rect's x coordinate
+        Message_rect.y = 0; // controls the rect's y coordinte
+        Message_rect.w = 100; // controls the width of the rect
+        Message_rect.h = 100; // controls the height of the rect
+
+        // (0,0) is on the top left of the window/screen,
+        // think a rect as the text's box,
+        // that way it would be very simple to understand
+
+        // Now since it's a texture, you have to put RenderCopy
+        // in your game loop area, the area where the whole code executes
+
+        // you put the renderer's name first, the Message,
+        // the crop size (you can ignore this if you don't want
+        // to dabble with cropping), and the rect which is the size
+        // and coordinate of your texture
+
+        // Need to assign all non-void values to null
+        _ = c.SDL_RenderCopy(renderer, Message, null, &Message_rect);
+
+        // Don't forget to free your surface and texture
+        defer c.SDL_FreeSurface(surfaceMessage);
+        defer c.SDL_DestroyTexture(Message);
+
         _ = c.SDL_RenderClear(renderer);
-        _ = c.SDL_RenderCopy(renderer, zig_texture, null, null);
+        // We render the text to the screen here:
+        _ = c.SDL_RenderCopy(renderer, Message, null, null);
         c.SDL_RenderPresent(renderer);
 
         c.SDL_Delay(17);
