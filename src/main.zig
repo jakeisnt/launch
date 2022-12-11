@@ -65,8 +65,18 @@ pub fn main() !void {
     var selection_len: i32 = 0;
     var cursor: i32 = 0;
 
+    // initialize SDL2_ttf
+    if (c.TTF_Init() != 0) {
+        c.SDL_Log("Unable to initialize SDL2_ttf: %s", c.TTF_GetError());
+        return error.SDLInitializationFailed;
+    }
+    defer c.TTF_Quit();
+
     //this opens a font style and sets a size
-    var Sans: *c.TTF_Font = c.TTF_OpenFont("Sans.ttf", 24).?;
+    var Sans: *c.TTF_Font = c.TTF_OpenFont("src/Sans.ttf", 24) orelse {
+        c.SDL_Log("Unable to retrieve TTF FOnt: %s", c.SDL_GetError());
+        return error.SDLInitializationFailed;
+    };
 
     // this is the color in rgb format,
     // maxing out all would give you the color white,
@@ -85,7 +95,7 @@ pub fn main() !void {
 
     // now you can convert it into a texture
     var Message: *c.SDL_Texture = c.SDL_CreateTextureFromSurface(renderer, surfaceMessage) orelse {
-        c.SDL_Log("Unable to create texture from surface: %s", c.SDL_GetError());
+        c.SDL_Log("Unable to create font texture from surface: %s", c.SDL_GetError());
         return error.SDLInitializationFailed;
     };
 
