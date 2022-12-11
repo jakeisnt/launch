@@ -66,20 +66,28 @@ pub fn main() !void {
     var cursor: i32 = 0;
 
     //this opens a font style and sets a size
-    var Sans: *c.TTF_Font = c.TTF_OpenFont("Sans.ttf", 24);
+    var Sans: *c.TTF_Font = c.TTF_OpenFont("Sans.ttf", 24).?;
 
     // this is the color in rgb format,
     // maxing out all would give you the color white,
     // and it will be your text's color
-    var White: c.SDL_Color = .{ 255, 255, 255 };
+    var Color = c.SDL_Color{
+        .r = 0xFF,
+        .g = 0xFF,
+        .b = 0xFF,
+        .a = 0xFF,
+    };
 
     // as TTF_RenderText_Solid could only be used on
     // SDL_Surface then you have to create the surface first
     var surfaceMessage: *c.SDL_Surface =
-        c.TTF_RenderText_Solid(Sans, "put your text here", White);
+        c.TTF_RenderText_Solid(Sans, "Test text!", Color);
 
     // now you can convert it into a texture
-    var Message: *c.SDL_Texture = c.SDL_CreateTextureFromSurface(renderer, surfaceMessage);
+    var Message: *c.SDL_Texture = c.SDL_CreateTextureFromSurface(renderer, surfaceMessage) orelse {
+        c.SDL_Log("Unable to create texture from surface: %s", c.SDL_GetError());
+        return error.SDLInitializationFailed;
+    };
 
     var Message_rect: c.SDL_Rect = undefined; //create a rect
     Message_rect.x = 0; //controls the rect's x coordinate
@@ -98,7 +106,9 @@ pub fn main() !void {
     // the crop size (you can ignore this if you don't want
     // to dabble with cropping), and the rect which is the size
     // and coordinate of your texture
-    c.SDL_RenderCopy(renderer, Message, null, &Message_rect);
+
+    // Need to assign all non-void values to null
+    _ = c.SDL_RenderCopy(renderer, Message, null, &Message_rect);
 
     // Don't forget to free your surface and texture
     defer c.SDL_FreeSurface(surfaceMessage);
