@@ -1,7 +1,10 @@
 const c = @cImport({
     @cInclude("SDL2/SDL.h");
 });
-const assert = @import("std").debug.assert;
+const std = @import("std");
+const print = std.debug.print;
+const assert = std.debug.assert;
+const ArrayList = std.ArrayList;
 
 pub fn main() !void {
     if (c.SDL_Init(c.SDL_INIT_VIDEO) != 0) {
@@ -42,6 +45,24 @@ pub fn main() !void {
     };
     defer c.SDL_DestroyTexture(zig_texture);
 
+    c.SDL_StartTextInput();
+
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    const allocator = gpa.allocator();
+
+    defer {
+        const leaked = gpa.deinit();
+        if (leaked) {
+            print("We leaked memory : (", .{});
+        }
+        // if (leaked) expect(false) catch @panic("Leaked memory when allocating!");
+    }
+
+    var composition: []u8 = undefined;
+    var text = ArrayList(u8).init(allocator);
+    var selection_len: i32 = 0;
+    var cursor: i32 = 0;
+
     var quit = false;
     while (!quit) {
         var event: c.SDL_Event = undefined;
@@ -49,6 +70,14 @@ pub fn main() !void {
             switch (event.type) {
                 c.SDL_QUIT => {
                     quit = true;
+                },
+                c.SDL_TEXTINPUT => {
+                    try text.appendSlice(&event.text.text);
+                },
+                c.SDL_TEXTEDITING => {
+                    composition = &event.edit.text;
+                    cursor = event.edit.start;
+                    selection_len = event.edit.length;
                 },
                 else => {},
             }
@@ -59,5 +88,9 @@ pub fn main() !void {
         c.SDL_RenderPresent(renderer);
 
         c.SDL_Delay(17);
+
+        // print("{x}\n", composition);
+        // print("{x}\n", text);
+        print("{d}\n", .{selection_len});
     }
 }
