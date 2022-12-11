@@ -72,9 +72,12 @@ pub fn main() !void {
                     quit = true;
                 },
                 c.SDL_TEXTINPUT => {
+                    print("received text input event: {c}\n", .{event.text.text});
                     try text.appendSlice(&event.text.text);
+                    print("resulting text: {c}\n", .{text.items});
                 },
                 c.SDL_TEXTEDITING => {
+                    print("received text editing event\n", .{});
                     composition = &event.edit.text;
                     cursor = event.edit.start;
                     selection_len = event.edit.length;
@@ -91,6 +94,6 @@ pub fn main() !void {
 
         // print("{x}\n", composition);
         // print("{x}\n", text);
-        print("{d}\n", .{selection_len});
+        // print("{d}\n", .{selection_len});
     }
 }
