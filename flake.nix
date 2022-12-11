@@ -55,7 +55,7 @@
             pango
             zls
             SDL2
-            SDL_ttf
+            SDL2_ttf
           ];
 
           LD_LIBRARY_PATH = "${pkgs.lib.makeLibraryPath (with pkgs; [ SDL2 SDL2_ttf cairo pango pixman ])}:$LD_LIBRARY_PATH";

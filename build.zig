@@ -6,7 +6,7 @@ pub fn build(b: *Builder) void {
 
     exe.setBuildMode(mode);
     exe.linkSystemLibrary("SDL2");
-    // exe.linkSystemLibrary("SDL_ttf");
+    exe.linkSystemLibrary("SDL2_ttf");
     exe.linkSystemLibrary("c");
 
     b.default_step.dependOn(&exe.step);

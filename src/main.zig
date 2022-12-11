@@ -1,7 +1,8 @@
 const c = @cImport({
     @cInclude("SDL2/SDL.h");
-    @cInclude("SDL2/SDL_ttf.h");
+    @cInclude("SDL2_ttf/SDL2_ttf.h");
 });
+
 const std = @import("std");
 const print = std.debug.print;
 const assert = std.debug.assert;
