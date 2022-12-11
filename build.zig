@@ -8,6 +8,7 @@ pub fn build(b: *Builder) void {
     exe.linkSystemLibrary("SDL2");
     exe.linkSystemLibrary("SDL2_ttf");
     exe.linkSystemLibrary("c");
+    exe.linkLibC();
 
     b.default_step.dependOn(&exe.step);
     b.installArtifact(exe);
