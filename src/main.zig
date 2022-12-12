@@ -150,7 +150,9 @@ pub fn main() !void {
         // the slice syntax we use takes a slice up to len terminating with the number 0
         // currently a panic! index out of bounds.
 
-        var messageText: [:0]const u8 = text.items[0..itemLen :0];
+        // I think this is because the arraylist doesn't have new memory allocated to hold the slice, which ends up being a copy?
+
+        var messageText: [:0]const u8 = text.items[0.. :0];
 
         var surfaceMessage: *c.SDL_Surface =
             c.TTF_RenderText_Solid(Sans, messageText.ptr, Color);
