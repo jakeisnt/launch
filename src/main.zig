@@ -127,7 +127,9 @@ pub fn main() !void {
         // sentinel termination: the list of N is 'terminated' by the value 0,
         // so the last element of an array is followed by a zero byte
 
-        try text.appendSlice("init");
+        // try text.appendSlice("init");
+
+        try text.append(0);
 
         print("got here\n", .{});
         print("{d}\n", .{text.items.len});
@@ -135,6 +137,7 @@ pub fn main() !void {
 
         print("itemLen is currently {d}\n", .{itemLen});
         // if (itemLen > 0) {
+        //     //sub1 so we keep that 0
         //     itemLen = itemLen - 1;
         // }
 
@@ -152,7 +155,7 @@ pub fn main() !void {
 
         // I think this is because the arraylist doesn't have new memory allocated to hold the slice, which ends up being a copy?
 
-        var messageText: [:0]const u8 = text.items[0.. :0];
+        var messageText: [:0]const u8 = text.items[0..itemLen :0];
 
         var surfaceMessage: *c.SDL_Surface =
             c.TTF_RenderText_Solid(Sans, messageText.ptr, Color);
@@ -162,6 +165,8 @@ pub fn main() !void {
             c.SDL_Log("Unable to create font texture from surface: %s", c.SDL_GetError());
             return error.SDLInitializationFailed;
         };
+
+        _ = text.popOrNull().?;
 
         var Message_rect: c.SDL_Rect = undefined; //create a rect
         Message_rect.x = 0; //controls the rect's x coordinate
