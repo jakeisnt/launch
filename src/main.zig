@@ -119,12 +119,12 @@ pub fn main() !void {
         // std.mem.copy(u8, messageText, text.items);
 
         // Stuck on what the [*c] means in [*c]const u8
-        const messageText: []const u8 = text.items;
+        // const messageText: [*c]const u8 = text.items;
 
         // as TTF_RenderText_Solid could only be used on
         // SDL_Surface then you have to create the surface first
         var surfaceMessage: *c.SDL_Surface =
-            c.TTF_RenderText_Solid(Sans, messageText, Color);
+            c.TTF_RenderText_Solid(Sans, text.items.ptr, Color);
 
         // now you can convert it into a texture
         var Message: *c.SDL_Texture = c.SDL_CreateTextureFromSurface(renderer, surfaceMessage) orelse {
