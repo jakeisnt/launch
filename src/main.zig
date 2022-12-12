@@ -110,6 +110,7 @@ pub fn sdl() !void {
                 },
                 c.SDL_TEXTINPUT => {
                     print("received text input event: {c}\n", .{event.text.text});
+                    // what is in event.text.text? i'm not sure yet
                     try text.append(event.text.text[0]);
                     print_array(text);
                 },
@@ -119,10 +120,12 @@ pub fn sdl() !void {
                     cursor = event.edit.start;
                     selection_len = event.edit.length;
                 },
-                else => {},
+                else => {
+                    print("{}\n", .{event.type});
+                },
             }
         }
-
+        // append space and null termination
         try text.append(0);
 
         var itemLen = text.items.len - 1;
@@ -146,11 +149,12 @@ pub fn sdl() !void {
             return error.SDLInitializationFailed;
         };
 
+        // then remove null termination right away
+        defer _ = text.popOrNull().?;
+
         // Emacs mode that lets me insert these into compiled binaries as hidden debug labels
         // like the stickers in common lisp
         // does zig have a way to do this such that it won't impact memory alignment?
-
-        _ = text.popOrNull().?;
 
         var Message_rect: c.SDL_Rect = undefined; //create a rect
         Message_rect.x = 0; //controls the rect's x coordinate
