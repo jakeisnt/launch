@@ -124,7 +124,7 @@ pub fn main() !void {
         // as TTF_RenderText_Solid could only be used on
         // SDL_Surface then you have to create the surface first
         var surfaceMessage: *c.SDL_Surface =
-            c.TTF_RenderText_Solid(Sans, text.items.ptr, Color);
+            c.TTF_RenderText_Solid(Sans, @ptrCast([*c]const u8, text.items.ptr), Color);
 
         // now you can convert it into a texture
         var Message: *c.SDL_Texture = c.SDL_CreateTextureFromSurface(renderer, surfaceMessage) orelse {
