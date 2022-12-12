@@ -113,7 +113,13 @@ pub fn main() !void {
 
         // should be text.items
         // https://forums.libsdl.org/viewtopic.php?p=37317 ??? does this help?
-        var messageText = try text.toConstSlice();
+
+        // const buffer: [1000]u8 = undefined;
+        // var messageText: []const u8 = buffer[0..text.items.len];
+        // std.mem.copy(u8, messageText, text.items);
+
+        // Stuck on what the [*c] means in [*c]const u8
+        const messageText: []const u8 = text.items;
 
         // as TTF_RenderText_Solid could only be used on
         // SDL_Surface then you have to create the surface first
