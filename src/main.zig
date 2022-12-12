@@ -8,6 +8,14 @@ const print = std.debug.print;
 const assert = std.debug.assert;
 const ArrayList = std.ArrayList;
 
+fn print_array(al: ArrayList(u8)) void {
+    print("\"", .{});
+    for (al.items) |elem| {
+        print("{c}", .{elem});
+    }
+    print("\"\n", .{});
+}
+
 // Renders a bmp image (specifically zig lol) to the screen in sdl2
 // fn display_img() void {
 //     const zig_bmp = @embedFile("zig.bmp");
@@ -102,13 +110,8 @@ pub fn sdl() !void {
                 },
                 c.SDL_TEXTINPUT => {
                     print("received text input event: {c}\n", .{event.text.text});
-                    try text.appendSlice(&event.text.text);
-
-                    print("\"", .{});
-                    for (text.items) |elem| {
-                        print("{c}", .{elem});
-                    }
-                    print("\"\n", .{});
+                    try text.append(event.text.text[0]);
+                    print_array(text);
                 },
                 c.SDL_TEXTEDITING => {
                     print("received text editing event\n", .{});
@@ -185,14 +188,6 @@ pub fn sdl() !void {
         // print("{x}\n", text);
         // print("{d}\n", .{selection_len});
     }
-}
-
-fn print_slice() void {
-    // print("itemLen is currently {d}\n", .{itemLen});
-    // if (itemLen > 0) {
-    //     // sub1 so we keep that 0
-    //     itemLen = itemLen - 1;
-    // }
 }
 
 pub fn main() !void {
