@@ -123,8 +123,37 @@ pub fn main() !void {
 
         // as TTF_RenderText_Solid could only be used on
         // SDL_Surface then you have to create the surface first
+
+        // sentinel termination: the list of N is 'terminated' by the value 0,
+        // so the last element of an array is followed by a zero byte
+
+        try text.appendSlice("init");
+
+        print("got here\n", .{});
+        print("{d}\n", .{text.items.len});
+        var itemLen = text.items.len;
+
+        print("itemLen is currently {d}\n", .{itemLen});
+        // if (itemLen > 0) {
+        //     itemLen = itemLen - 1;
+        // }
+
+        print("itemLen is now {d}\n", .{itemLen});
+
+        print("\"", .{});
+        for (text.items) |elem| {
+            print("{c}", .{elem});
+        }
+        print("\"\n", .{});
+
+        // slice syntax: `:0` is termination with a number.
+        // the slice syntax we use takes a slice up to len terminating with the number 0
+        // currently a panic! index out of bounds.
+
+        var messageText: [:0]const u8 = text.items[0..itemLen :0];
+
         var surfaceMessage: *c.SDL_Surface =
-            c.TTF_RenderText_Solid(Sans, @ptrCast([*c]const u8, text.items.ptr), Color);
+            c.TTF_RenderText_Solid(Sans, messageText.ptr, Color);
 
         // now you can convert it into a texture
         var Message: *c.SDL_Texture = c.SDL_CreateTextureFromSurface(renderer, surfaceMessage) orelse {
