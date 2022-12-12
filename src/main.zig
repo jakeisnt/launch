@@ -8,26 +8,27 @@ const print = std.debug.print;
 const assert = std.debug.assert;
 const ArrayList = std.ArrayList;
 
-fn display_img() void {
-    const zig_bmp = @embedFile("zig.bmp");
-    const rw = c.SDL_RWFromConstMem(zig_bmp, zig_bmp.len) orelse {
-        c.SDL_Log("Unable to get RWFromConstMem: %s", c.SDL_GetError());
-        return error.SDLInitializationFailed;
-    };
-    defer assert(c.SDL_RWclose(rw) == 0);
+// Renders a bmp image (specifically zig lol) to the screen in sdl2
+// fn display_img() void {
+//     const zig_bmp = @embedFile("zig.bmp");
+//     const rw = c.SDL_RWFromConstMem(zig_bmp, zig_bmp.len) orelse {
+//         c.SDL_Log("Unable to get RWFromConstMem: %s", c.SDL_GetError());
+//         return error.SDLInitializationFailed;
+//     };
+//     defer assert(c.SDL_RWclose(rw) == 0);
 
-    const zig_surface = c.SDL_LoadBMP_RW(rw, 0) orelse {
-        c.SDL_Log("Unable to load bmp: %s", c.SDL_GetError());
-        return error.SDLInitializationFailed;
-    };
-    defer c.SDL_FreeSurface(zig_surface);
+//     const zig_surface = c.SDL_LoadBMP_RW(rw, 0) orelse {
+//         c.SDL_Log("Unable to load bmp: %s", c.SDL_GetError());
+//         return error.SDLInitializationFailed;
+//     };
+//     defer c.SDL_FreeSurface(zig_surface);
 
-    const zig_texture = c.SDL_CreateTextureFromSurface(renderer, zig_surface) orelse {
-        c.SDL_Log("Unable to create texture from surface: %s", c.SDL_GetError());
-        return error.SDLInitializationFailed;
-    };
-    defer c.SDL_DestroyTexture(zig_texture);
-}
+//     const zig_texture = c.SDL_CreateTextureFromSurface(renderer, zig_surface) orelse {
+//         c.SDL_Log("Unable to create texture from surface: %s", c.SDL_GetError());
+//         return error.SDLInitializationFailed;
+//     };
+//     defer c.SDL_DestroyTexture(zig_texture);
+// }
 
 pub fn sdl() !void {
     if (c.SDL_Init(c.SDL_INIT_VIDEO) != 0) {
@@ -59,7 +60,6 @@ pub fn sdl() !void {
         if (leaked) {
             print("We leaked memory : (", .{});
         }
-        // if (leaked) expect(false) catch @panic("Leaked memory when allocating!");
     }
 
     var composition: []u8 = undefined;
@@ -77,7 +77,7 @@ pub fn sdl() !void {
     defer c.TTF_Quit();
 
     //this opens a font style and sets a size
-    var Sans: *c.TTF_Font = c.TTF_OpenFont("src/Sans.ttf", 24) orelse {
+    var Sans: *c.TTF_Font = c.TTF_OpenFont("src/Sans.ttf", 12) orelse {
         c.SDL_Log("Unable to retrieve TTF FOnt: %s", c.SDL_GetError());
         return error.SDLInitializationFailed;
     };
@@ -103,7 +103,12 @@ pub fn sdl() !void {
                 c.SDL_TEXTINPUT => {
                     print("received text input event: {c}\n", .{event.text.text});
                     try text.appendSlice(&event.text.text);
-                    print("resulting text: {c}\n", .{text.items});
+
+                    print("\"", .{});
+                    for (text.items) |elem| {
+                        print("{c}", .{elem});
+                    }
+                    print("\"\n", .{});
                 },
                 c.SDL_TEXTEDITING => {
                     print("received text editing event\n", .{});
@@ -119,30 +124,18 @@ pub fn sdl() !void {
 
         var itemLen = text.items.len - 1;
 
-        // print("\"", .{});
-        // for (text.items) |elem| {
-        //     print("{c}", .{elem});
-        // }
-        // print("\"\n", .{});
-
         // slice syntax: `:0` is termination with a number.
         // the slice syntax we use takes a slice up to len terminating with the number 0
         // currently a panic! index out of bounds.
 
         // I think this is because the arraylist doesn't have new memory allocated to hold the slice, which ends up being a copy?
 
-        print("panic yet?\n", .{});
-
         var messageText: [:0]const u8 = text.items[0..itemLen :0];
-
-        print("panic yet?\n", .{});
 
         // cast causes ptr to be null
         // @ptrCast([*c]const u8, messageText)
         var surfaceMessage: *c.SDL_Surface =
             c.TTF_RenderText_Solid(Sans, messageText.ptr, Color);
-
-        print("panic yet?\n", .{});
 
         // now you can convert it into a texture
         var Message: *c.SDL_Texture = c.SDL_CreateTextureFromSurface(renderer, surfaceMessage) orelse {
@@ -153,8 +146,6 @@ pub fn sdl() !void {
         // Emacs mode that lets me insert these into compiled binaries as hidden debug labels
         // like the stickers in common lisp
         // does zig have a way to do this such that it won't impact memory alignment?
-
-        print("panic yet?\n", .{});
 
         _ = text.popOrNull().?;
 
