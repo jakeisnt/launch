@@ -164,6 +164,8 @@ pub fn sdl() !void {
         Message_rect.w = 1000; // controls the width of the rect
         Message_rect.h = 1000; // controls the height of the rect
 
+        c.SDL_SetTextInputRect(@ptrCast([*c]c.SDL_Rect, &Message_rect));
+
         // (0,0) is on the top left of the window/screen,
         // think a rect as the text's box,
         // that way it would be very simple to understand
