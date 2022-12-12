@@ -16,6 +16,14 @@ fn print_array(al: ArrayList(u8)) void {
     print("\"\n", .{});
 }
 
+fn print_slice(al: []u8) void {
+    print("\"", .{});
+    for (al) |elem| {
+        print("{c}", .{elem});
+    }
+    print("\"\n", .{});
+}
+
 // Renders a bmp image (specifically zig lol) to the screen in sdl2
 // fn display_img() void {
 //     const zig_bmp = @embedFile("zig.bmp");
@@ -58,8 +66,6 @@ pub fn sdl() !void {
     };
     defer c.SDL_DestroyRenderer(renderer);
 
-    c.SDL_StartTextInput();
-
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     const allocator = gpa.allocator();
 
@@ -93,14 +99,16 @@ pub fn sdl() !void {
     // this is the color in rgb format,
     // maxing out all would give you the color white,
     // and it will be your text's color
-    var Color = c.SDL_Color{
+    const Color = c.SDL_Color{
         .r = 0xFF,
         .g = 0xFF,
         .b = 0xFF,
         .a = 0xFF,
     };
 
+    c.SDL_StartTextInput();
     var quit = false;
+
     while (!quit) {
         var event: c.SDL_Event = undefined;
         while (c.SDL_PollEvent(&event) != 0) {
@@ -117,6 +125,8 @@ pub fn sdl() !void {
                 c.SDL_TEXTEDITING => {
                     print("received text editing event\n", .{});
                     composition = &event.edit.text;
+                    print("printing slice: ", .{});
+                    print_slice(composition);
                     cursor = event.edit.start;
                     selection_len = event.edit.length;
                 },
@@ -130,16 +140,8 @@ pub fn sdl() !void {
 
         var itemLen = text.items.len - 1;
 
-        // slice syntax: `:0` is termination with a number.
-        // the slice syntax we use takes a slice up to len terminating with the number 0
-        // currently a panic! index out of bounds.
-
-        // I think this is because the arraylist doesn't have new memory allocated to hold the slice, which ends up being a copy?
-
         var messageText: [:0]const u8 = text.items[0..itemLen :0];
 
-        // cast causes ptr to be null
-        // @ptrCast([*c]const u8, messageText)
         var surfaceMessage: *c.SDL_Surface =
             c.TTF_RenderText_Solid(Sans, messageText.ptr, Color);
 
