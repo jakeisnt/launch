@@ -131,23 +131,23 @@ pub fn main() !void {
 
         try text.append(0);
 
-        print("got here\n", .{});
-        print("{d}\n", .{text.items.len});
+        // print("got here\n", .{});
+        // print("{d}\n", .{text.items.len});
         var itemLen = text.items.len;
 
-        print("itemLen is currently {d}\n", .{itemLen});
-        // if (itemLen > 0) {
-        //     //sub1 so we keep that 0
-        //     itemLen = itemLen - 1;
+        // print("itemLen is currently {d}\n", .{itemLen});
+        // // if (itemLen > 0) {
+        // //     //sub1 so we keep that 0
+        // //     itemLen = itemLen - 1;
+        // // }
+
+        // print("itemLen is now {d}\n", .{itemLen});
+
+        // print("\"", .{});
+        // for (text.items) |elem| {
+        //     print("{c}", .{elem});
         // }
-
-        print("itemLen is now {d}\n", .{itemLen});
-
-        print("\"", .{});
-        for (text.items) |elem| {
-            print("{c}", .{elem});
-        }
-        print("\"\n", .{});
+        // print("\"\n", .{});
 
         // slice syntax: `:0` is termination with a number.
         // the slice syntax we use takes a slice up to len terminating with the number 0
@@ -155,10 +155,16 @@ pub fn main() !void {
 
         // I think this is because the arraylist doesn't have new memory allocated to hold the slice, which ends up being a copy?
 
+        print("panic yet?\n", .{});
+
         var messageText: [:0]const u8 = text.items[0..itemLen :0];
+
+        print("panic yet?\n", .{});
 
         var surfaceMessage: *c.SDL_Surface =
             c.TTF_RenderText_Solid(Sans, messageText.ptr, Color);
+
+        print("panic yet?\n", .{});
 
         // now you can convert it into a texture
         var Message: *c.SDL_Texture = c.SDL_CreateTextureFromSurface(renderer, surfaceMessage) orelse {
@@ -166,7 +172,12 @@ pub fn main() !void {
             return error.SDLInitializationFailed;
         };
 
-        _ = text.popOrNull().?;
+        // Emacs mode that lets me insert these into compiled binaries as hidden debug labels
+        // like the stickers in common lisp
+        // does zig have a way to do this such that it won't impact memory alignment?
+
+        print("panic yet?\n", .{});
+        // _ = text.popOrNull().?;
 
         var Message_rect: c.SDL_Rect = undefined; //create a rect
         Message_rect.x = 0; //controls the rect's x coordinate
