@@ -8,7 +8,7 @@ const print = std.debug.print;
 const assert = std.debug.assert;
 const ArrayList = std.ArrayList;
 
-pub fn main() !void {
+pub fn sdl() !void {
     if (c.SDL_Init(c.SDL_INIT_VIDEO) != 0) {
         c.SDL_Log("Unable to initialize SDL: %s", c.SDL_GetError());
         return error.SDLInitializationFailed;
@@ -65,6 +65,8 @@ pub fn main() !void {
     var selection_len: i32 = 0;
     var cursor: i32 = 0;
 
+    try text.appendSlice("a");
+
     // initialize SDL2_ttf
     if (c.TTF_Init() != 0) {
         c.SDL_Log("Unable to initialize SDL2_ttf: %s", c.TTF_GetError());
@@ -111,37 +113,9 @@ pub fn main() !void {
             }
         }
 
-        // should be text.items
-        // https://forums.libsdl.org/viewtopic.php?p=37317 ??? does this help?
-
-        // const buffer: [1000]u8 = undefined;
-        // var messageText: []const u8 = buffer[0..text.items.len];
-        // std.mem.copy(u8, messageText, text.items);
-
-        // Stuck on what the [*c] means in [*c]const u8
-        // const messageText: [*c]const u8 = text.items;
-
-        // as TTF_RenderText_Solid could only be used on
-        // SDL_Surface then you have to create the surface first
-
-        // sentinel termination: the list of N is 'terminated' by the value 0,
-        // so the last element of an array is followed by a zero byte
-
-        // try text.appendSlice("init");
-
         try text.append(0);
 
-        // print("got here\n", .{});
-        // print("{d}\n", .{text.items.len});
-        var itemLen = text.items.len;
-
-        // print("itemLen is currently {d}\n", .{itemLen});
-        // // if (itemLen > 0) {
-        // //     //sub1 so we keep that 0
-        // //     itemLen = itemLen - 1;
-        // // }
-
-        // print("itemLen is now {d}\n", .{itemLen});
+        var itemLen = text.items.len - 1;
 
         // print("\"", .{});
         // for (text.items) |elem| {
@@ -161,6 +135,8 @@ pub fn main() !void {
 
         print("panic yet?\n", .{});
 
+        // cast causes ptr to be null
+        // @ptrCast([*c]const u8, messageText)
         var surfaceMessage: *c.SDL_Surface =
             c.TTF_RenderText_Solid(Sans, messageText.ptr, Color);
 
@@ -177,7 +153,8 @@ pub fn main() !void {
         // does zig have a way to do this such that it won't impact memory alignment?
 
         print("panic yet?\n", .{});
-        // _ = text.popOrNull().?;
+
+        _ = text.popOrNull().?;
 
         var Message_rect: c.SDL_Rect = undefined; //create a rect
         Message_rect.x = 0; //controls the rect's x coordinate
@@ -215,4 +192,19 @@ pub fn main() !void {
         // print("{x}\n", text);
         // print("{d}\n", .{selection_len});
     }
+}
+
+fn print_slice() void {
+    // print("itemLen is currently {d}\n", .{itemLen});
+    // if (itemLen > 0) {
+    //     // sub1 so we keep that 0
+    //     itemLen = itemLen - 1;
+    // }
+}
+
+pub fn main() !void {
+    try sdl();
+    // var text = ArrayList(u8).init(allocator);
+    // text.append(0);
+    // const slice: [:0]const u8 = text.items[0..itemLen :0];
 }
