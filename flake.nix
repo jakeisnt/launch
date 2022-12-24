@@ -34,7 +34,7 @@
   in
     flake-utils.lib.eachSystem systems (
       system: let
-        pkgs = import nixpkgs {inherit overlays system;};
+        pkgs = import nixpkgs { inherit overlays system; };
       in rec {
         defaultPackage = pkgs.zigpkgs.master;
         devShells.default = pkgs.mkShell {
