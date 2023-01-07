@@ -1,4 +1,5 @@
 use eframe::egui;
+use egui::*;
 use fuzzy_matcher::skim::SkimMatcherV2;
 use fuzzy_matcher::FuzzyMatcher;
 
@@ -14,7 +15,7 @@ struct MyApp {
     query: String,
     options: Vec<String>,
     matcher: SkimMatcherV2,
-    idx: u8,
+    idx: usize,
 }
 
 impl MyApp {
@@ -32,13 +33,35 @@ impl eframe::App for MyApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.text_edit_singleline(&mut self.query).request_focus();
-            self.options
-                .iter()
-                .filter(|opt| self.matcher.fuzzy_match(opt, &self.query).is_some())
-                .for_each(|x| {
-                    ui.heading(x);
-                });
+            ScrollArea::vertical()
+                .auto_shrink([false; 2])
+                .stick_to_bottom(true)
+                .show(ui, |ui| {
+                    self.options
+                        .iter()
+                        .filter(|opt| self.matcher.fuzzy_match(opt, &self.query).is_some())
+                        .enumerate()
+                        .for_each(|(i, x)| {
+                            if i == self.idx {
+                                ui.label(egui::RichText::new(x).underline());
+                            } else {
+                                ui.heading(x);
+                            }
+                        });
+                })
         });
+
+        if ctx.input().key_pressed(Key::ArrowDown) {
+            self.idx += 1;
+        }
+
+        if ctx.input().key_pressed(Key::ArrowUp) {
+            self.idx -= 1;
+        }
+
+        if ctx.input().key_pressed(Key::Enter) {
+            panic!("{:?}", self.options[self.idx]);
+        }
 
         // idx starts at launching app 0.
         // if the arrow keys go down, we select the next one
