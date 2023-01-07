@@ -49,6 +49,8 @@ pub fn main() {
     let main_window = WindowDesc::new(build_root_widget())
         .title(WINDOW_TITLE)
         .menu(make_menu)
+        // TODO: How do we force the window to float?
+        .set_position((100.0, 100.0))
         .window_size((400.0, 600.0));
 
     // create the initial app state
@@ -94,19 +96,7 @@ fn build_root_widget() -> impl Widget<AppState> {
 #[allow(unused_assignments, unused_mut)]
 fn make_menu<T: Data>(_window: Option<WindowId>, _data: &AppState, _env: &Env) -> Menu<T> {
     let mut base = Menu::empty();
-    #[cfg(target_os = "macos")]
-    {
-        base = base.entry(druid::platform_menus::mac::application::default())
-    }
-    #[cfg(any(
-        target_os = "windows",
-        target_os = "freebsd",
-        target_os = "linux",
-        target_os = "openbsd"
-    ))]
-    {
-        base = base.entry(druid::platform_menus::win::file::default());
-    }
+    let mut base = base.entry(druid::platform_menus::win::file::default());
     base.entry(
         Menu::new(LocalizedString::new("common-menu-edit-menu"))
             .entry(druid::platform_menus::common::undo())
