@@ -54,14 +54,17 @@
           mesa
 
 
-          # just for druid?
-            glib
-            pango
-            cairo
-            gdk-pixbuf
-            atk
-            gtk3
-            libGL
+          # just for gui lib?
+          glib
+          pango
+          cairo
+          gdk-pixbuf
+          atk
+          gtk3
+          libGL
+
+          # support executing gpu-supported programs
+          vulkan-tools
         ];
       in {
         defaultPackage = naersk-lib.buildPackage {

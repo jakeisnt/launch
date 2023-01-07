@@ -3,6 +3,27 @@ use egui::*;
 use fuzzy_matcher::skim::SkimMatcherV2;
 use fuzzy_matcher::FuzzyMatcher;
 
+// for desktop entry finding
+// Spec: https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
+use std::fs;
+use freedesktop_desktop_entry::{default_paths, DesktopEntry, Iter, PathSource};
+
+fn find_desktop_entries() -> &'static Vec<DesktopEntry<'static>> {
+    let mut entries: Vec<DesktopEntry> = vec![];
+
+    for path in Iter::new(default_paths()) {
+        // let path_src = PathSource::guess_from(&path);
+        if let Ok(bytes) = fs::read_to_string(&path) {
+            if let Ok(entry) = DesktopEntry::decode(&path, &bytes) {
+                // println!("{:?}: {}\n---\n{}", path_src, path.display(), entry);
+                entries.push(entry)
+            }
+        }
+    }
+
+    &entries
+}
+
 fn main() -> Result<(), eframe::Error> {
     let options = eframe::NativeOptions {
         initial_window_size: Some(egui::vec2(320.0, 240.0)),
@@ -10,6 +31,9 @@ fn main() -> Result<(), eframe::Error> {
     };
     eframe::run_native("launch", options, Box::new(|cc| Box::new(MyApp::new(cc))))
 }
+
+// let de = DesktopEntry::decode(path.as_path(), &input).expect("Error decoding desktop entry");
+// de.launch(&[]).expect("Failed to run desktop entry");
 
 // this launcher looks awesome: https://github.com/Biont/sway-launcher-desktop
 
@@ -20,24 +44,19 @@ fn main() -> Result<(), eframe::Error> {
 // Finished reading all 29 applications (0.001078074s)
 
 // https://github.com/pop-os/freedesktop-desktop-entry/pull/5/files
-//   # https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
 
-struct MyApp {
+struct MyApp<'a> {
     query: String,
-    options: Vec<String>,
+    options: &Vec<DesktopEntry<'a>>,
     matcher: SkimMatcherV2,
     idx: usize,
 }
 
-// NOTE:
-// https://github.com/fiveawe/desktopentries/tree/b991b8c70f967a6537c16314188377ff51821bf5/
-// has the desktop entries specification.
-
-impl MyApp {
-    fn new(cc: &eframe::CreationContext<'_>) -> Self {
+impl<'a> MyApp<'a> {
+    fn new(_cc: &eframe::CreationContext<'_>) -> Self {
         Self {
             // TODO: Get options by scanning .desktop files and reading their names
-            options: vec!["Firefox".into(), "Amazon".into(), "Google Chrome".into()],
+            options: find_desktop_entries(),
             query: "".to_owned(),
             matcher: SkimMatcherV2::default(),
             idx: 0,
@@ -45,17 +64,23 @@ impl MyApp {
     }
 }
 
-impl eframe::App for MyApp {
+impl<'a> eframe::App for MyApp<'a> {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         // iterator that owns its references ->
         // this was likely the issue i was having before
 
-        let opts: Vec<String> = self
+        let opts: Vec<DesktopEntry<'a>> = self
+            // .to_owned()
             .options
-            .to_owned()
-            .into_iter()
-            .filter(|opt| self.matcher.fuzzy_match(opt, &self.query).is_some())
-            .collect();
+            .iter()
+            .filter(|entry| {
+                if let Some(name) = entry.name(None) {
+                    return self.matcher.fuzzy_match(&name, &self.query).is_some();
+                }
+                return false;
+            })
+            .collect::<DesktopEntry<'a>>()
+            .into();
 
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.text_edit_singleline(&mut self.query).request_focus();
@@ -63,11 +88,13 @@ impl eframe::App for MyApp {
                 .auto_shrink([false; 2])
                 .stick_to_bottom(true)
                 .show(ui, |ui| {
-                    opts.iter().enumerate().for_each(|(i, x)| {
-                        if i == self.idx {
-                            ui.label(egui::RichText::new(x).underline());
-                        } else {
-                            ui.heading(x);
+                    opts.iter().enumerate().for_each(|(i, entry)| {
+                        if let Some(name) = entry.name(None) {
+                            if i == self.idx {
+                                ui.label(egui::RichText::new(name).underline());
+                            } else {
+                                ui.heading(name);
+                            }
                         }
                     });
                 })
