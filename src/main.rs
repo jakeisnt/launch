@@ -65,6 +65,8 @@ pub fn main() {
         .expect("Failed to launch application");
 }
 
+// I should probably not use Druid... it's too experimental, and I *want* immediate mode.
+
 fn build_root_widget() -> impl Widget<AppState> {
     let reflect: Label<Arc<String>> = Label::dynamic(|data, _| format!("{}", data));
 
