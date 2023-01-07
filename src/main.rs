@@ -33,10 +33,9 @@ const WINDOW_TITLE: LocalizedString<AppState> = LocalizedString::new("Text Optio
 
 #[derive(Clone, Data, Lens)]
 struct AppState {
-    multi: Arc<String>,
-    single: Arc<String>,
+    query: Arc<String>,
     // items to search through
-    items: Arc<Vector<&'static str>>,
+    items: Vector<&'static str>,
     // cursor index
     idx: u32,
 }
@@ -56,8 +55,7 @@ pub fn main() {
 
     // create the initial app state
     let initial_state = AppState {
-        single: "".to_string().into(),
-        multi: "".to_string().into(),
+        query: "".to_string().into(),
         idx: 0,
         items: items.into(),
     };
@@ -76,36 +74,32 @@ fn build_root_widget() -> impl Widget<AppState> {
 
     let child = TextBox::multiline()
         .with_placeholder("Search...")
-        .lens(AppState::multi)
+        .lens(AppState::query)
         .expand_width();
-
-    // let mut results = Flex::column().cross_axis_alignment(druid::widget::CrossAxisAlignment::Start);
 
     let mut lists = Flex::row().cross_axis_alignment(druid::widget::CrossAxisAlignment::Start);
 
     // Build a simple list
     lists.add_flex_child(
         Scroll::new(List::new(|| {
-            Label::new(|(_, item): &(Vector<String>, String), _env: &_| {
-                format!("List item #{}", item)
-            })
-            .align_vertical(druid::UnitPoint::LEFT)
-            // Label::new(|item: String, __| format!("List item {:?}", item))
-            //     .align_vertical(druid::UnitPoint::LEFT)
-            //     .padding(10.0)
-            //     .expand()
-            //     .height(50.0)
-            //     .background(Color::rgb(0.5, 0.5, 0.5))
+            Label::new(|msg: &&str, _env: &_| format!("List item {:?}", msg))
         }))
         .vertical()
-        .lens(AppState::items),
+        // AppState::items
+        .lens(druid::lens::Field::new(
+            |v: AppState| {
+            let query: String = *v.query;
+            v.items.iter().filter(|elem| elem.eq(&query)).collect()
+        },
+
+        ),
         1.0,
     );
 
     Flex::column()
         .cross_axis_alignment(druid::widget::CrossAxisAlignment::Start)
         .with_flex_child(child, 1.0)
-        .with_flex_child(reflect.lens(AppState::multi), 1.0)
+        .with_flex_child(reflect.lens(AppState::query), 1.0)
         .with_flex_child(lists, 1.0)
         .padding(8.0)
 }
