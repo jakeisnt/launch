@@ -6,6 +6,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-druid = { git = "https://github.com/linebender/druid.git" }
+druid = { git = "https://github.com/linebender/druid.git", features = ["im"] }
 instant = "0.1.12"
 pulldown-cmark = "0.9.2"

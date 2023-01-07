@@ -22,7 +22,9 @@
 
 use std::sync::Arc;
 
-use druid::widget::{ClipBox, Flex, Label, TextBox};
+// NOTE: Bad sign 1: have to use a custom implementation of a vector.
+use druid::im::{vector, Vector};
+use druid::widget::{Flex, Label, List, Scroll, TextBox};
 use druid::{
     AppLauncher, Color, Data, Env, Lens, LocalizedString, Widget, WidgetExt, WindowDesc, WindowId,
 };
@@ -34,7 +36,7 @@ struct AppState {
     multi: Arc<String>,
     single: Arc<String>,
     // items to search through
-    items: Arc<Vec<String>>,
+    items: Arc<Vector<&'static str>>,
     // cursor index
     idx: u32,
 }
@@ -47,15 +49,17 @@ pub fn main() {
         // TODO: How do we force the window to float?
         .set_window_state(druid::WindowState::Restored);
 
+    let items: Vector<&str> = vector!["the", "quick", "brown", "fox"];
+    // .map(|st| st.to_string())
+    // .to_vec()
+    // .into();
+
     // create the initial app state
     let initial_state = AppState {
         single: "".to_string().into(),
         multi: "".to_string().into(),
-        items: ["the", "quick", "brown", "fox"]
-            .map(|st| st.to_string())
-            .to_vec()
-            .into(),
         idx: 0,
+        items: items.into(),
     };
 
     // start the application
@@ -65,7 +69,7 @@ pub fn main() {
         .expect("Failed to launch application");
 }
 
-// I should probably not use Druid... it's too experimental, and I *want* immediate mode.
+// I should probably not use Druid... it's too experimental, and I want to avoid immediate mode.
 
 fn build_root_widget() -> impl Widget<AppState> {
     let reflect: Label<Arc<String>> = Label::dynamic(|data, _| format!("{}", data));
@@ -77,9 +81,31 @@ fn build_root_widget() -> impl Widget<AppState> {
 
     // let mut results = Flex::column().cross_axis_alignment(druid::widget::CrossAxisAlignment::Start);
 
+    let mut lists = Flex::row().cross_axis_alignment(druid::widget::CrossAxisAlignment::Start);
+
+    // Build a simple list
+    lists.add_flex_child(
+        Scroll::new(List::new(|| {
+            Label::new(|(_, item): &(Vector<String>, String), _env: &_| {
+                format!("List item #{}", item)
+            })
+            .align_vertical(druid::UnitPoint::LEFT)
+            // Label::new(|item: String, __| format!("List item {:?}", item))
+            //     .align_vertical(druid::UnitPoint::LEFT)
+            //     .padding(10.0)
+            //     .expand()
+            //     .height(50.0)
+            //     .background(Color::rgb(0.5, 0.5, 0.5))
+        }))
+        .vertical()
+        .lens(AppState::items),
+        1.0,
+    );
+
     Flex::column()
         .cross_axis_alignment(druid::widget::CrossAxisAlignment::Start)
         .with_flex_child(child, 1.0)
         .with_flex_child(reflect.lens(AppState::multi), 1.0)
+        .with_flex_child(lists, 1.0)
         .padding(8.0)
 }
