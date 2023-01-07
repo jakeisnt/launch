@@ -22,20 +22,12 @@
 
 use std::sync::Arc;
 
-use druid::widget::{Flex, Label, TextBox};
+use druid::widget::{ClipBox, Flex, Label, TextBox};
 use druid::{
     AppLauncher, Color, Data, Env, Lens, LocalizedString, Widget, WidgetExt, WindowDesc, WindowId,
 };
 
 const WINDOW_TITLE: LocalizedString<AppState> = LocalizedString::new("Text Options");
-
-const EXPLAINER: &str = "\
-    This example demonstrates some of the possible configurations \
-    of the TextBox widget.\n\
-    The top textbox allows a single line of input, with horizontal scrolling \
-    but no scrollbars. The bottom textbox allows multiple lines of text, wrapping \
-    words to fit the width, and allowing vertical scrolling when it runs out \
-    of room to grow vertically.";
 
 #[derive(Clone, Data, Lens)]
 struct AppState {
@@ -65,28 +57,16 @@ pub fn main() {
 }
 
 fn build_root_widget() -> impl Widget<AppState> {
-    let blurb = Label::new(EXPLAINER)
-        .with_line_break_mode(druid::widget::LineBreaking::WordWrap)
-        .padding(8.0)
-        .border(Color::grey(0.6), 2.0)
-        .rounded(5.0);
+    let reflect: Label<Arc<String>> = Label::dynamic(|data, _| format!("{}", data));
+
+    let child = TextBox::multiline()
+        .with_placeholder("Multi")
+        .lens(AppState::multi)
+        .expand_width();
 
     Flex::column()
         .cross_axis_alignment(druid::widget::CrossAxisAlignment::Start)
-        .with_child(blurb)
-        .with_spacer(24.0)
-        .with_child(
-            TextBox::new()
-                .with_placeholder("Single")
-                .lens(AppState::single),
-        )
-        .with_default_spacer()
-        .with_flex_child(
-            TextBox::multiline()
-                .with_placeholder("Multi")
-                .lens(AppState::multi)
-                .expand_width(),
-            1.0,
-        )
+        .with_flex_child(child, 1.0)
+        .with_flex_child(reflect.lens(AppState::multi), 1.0)
         .padding(8.0)
 }
