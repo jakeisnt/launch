@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 # druid = { git = "https://github.com/linebender/druid.git", features = ["im"] }
 eframe = { git = "https://github.com/emilk/egui.git" }
+fuzzy-matcher = "0.3.7"
 # egui = "0.20.1"
 # instant = "0.1.12"
 # pulldown-cmark = "0.9.2"
