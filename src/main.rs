@@ -18,9 +18,14 @@ struct MyApp {
     idx: usize,
 }
 
+// NOTE:
+// https://github.com/fiveawe/desktopentries/tree/b991b8c70f967a6537c16314188377ff51821bf5/
+// has the desktop entries specification.
+
 impl MyApp {
     fn new(cc: &eframe::CreationContext<'_>) -> Self {
         Self {
+            // TODO: Get options by scanning .desktop files and reading their names
             options: vec!["Firefox".into(), "Amazon".into(), "Google Chrome".into()],
             query: "".to_owned(),
             matcher: SkimMatcherV2::default(),
