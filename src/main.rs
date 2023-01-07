@@ -85,22 +85,28 @@ fn build_root_widget() -> impl Widget<AppState> {
     // Build a simple list
     lists.add_flex_child(
         Scroll::new(List::new(|| {
-            Label::new(|msg: &&str, _env: &_| format!("List item {:?}", msg))
+            Label::dynamic(|msg, env: &_| format!("List item {:?}", msg))
         }))
         .vertical()
         // AppState::items
         .lens(druid::lens::Field::new(
-            |v: AppState| {
-                v.items
+            |v: &AppState| {
+                let ret: &Vector<String> = &v
+                    .items
                     .iter()
                     .filter(|elem| (*elem).eq(&*v.query))
-                    .collect()
+                    .collect();
+
+                ret
             },
-            |v: AppState| {
-                v.items
+            |v| {
+                let ret: &mut Vector<String> = &v
+                    .items
                     .iter()
                     .filter(|elem| (*elem).eq(&*v.query))
-                    .collect()
+                    .collect();
+
+                ret
             },
         )),
         1.0,
