@@ -47,7 +47,7 @@ impl eframe::App for MyApp {
                 .auto_shrink([false; 2])
                 .stick_to_bottom(true)
                 .show(ui, |ui| {
-                    &opts.iter().enumerate().for_each(|(i, x)| {
+                    opts.iter().enumerate().for_each(|(i, x)| {
                         if i == self.idx {
                             ui.label(egui::RichText::new(x).underline());
                         } else {
