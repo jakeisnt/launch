@@ -31,8 +31,7 @@ impl MyApp {
 impl eframe::App for MyApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.heading("egui using custom fonts");
-            ui.text_edit_singleline(&mut self.query);
+            ui.text_edit_singleline(&mut self.query).request_focus();
             self.options
                 .iter()
                 .filter(|opt| self.matcher.fuzzy_match(opt, &self.query).is_some())
