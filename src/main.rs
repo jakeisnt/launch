@@ -35,7 +35,7 @@ const WINDOW_TITLE: LocalizedString<AppState> = LocalizedString::new("Text Optio
 struct AppState {
     query: Arc<String>,
     // items to search through
-    items: Vector<&'static str>,
+    items: Vector<String>,
     // cursor index
     idx: u32,
 }
@@ -48,7 +48,10 @@ pub fn main() {
         // TODO: How do we force the window to float?
         .set_window_state(druid::WindowState::Restored);
 
-    let items: Vector<&str> = vector!["the", "quick", "brown", "fox"];
+    let items: Vector<String> = vector!["the", "quick", "brown", "fox"]
+        .iter()
+        .map(|s| (*s).into())
+        .collect();
     // .map(|st| st.to_string())
     // .to_vec()
     // .into();
@@ -86,10 +89,20 @@ fn build_root_widget() -> impl Widget<AppState> {
         }))
         .vertical()
         // AppState::items
-        .lens(druid::lens::Field::new(|v: AppState| {
-            let query: String = *v.query;
-            v.items.iter().filter(|elem| elem.eq(&query)).collect()
-        })),
+        .lens(druid::lens::Field::new(
+            |v: AppState| {
+                v.items
+                    .iter()
+                    .filter(|elem| (*elem).eq(&*v.query))
+                    .collect()
+            },
+            |v: AppState| {
+                v.items
+                    .iter()
+                    .filter(|elem| (*elem).eq(&*v.query))
+                    .collect()
+            },
+        )),
         1.0,
     );
 
