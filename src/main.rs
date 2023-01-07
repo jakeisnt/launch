@@ -11,6 +11,8 @@ fn main() -> Result<(), eframe::Error> {
     eframe::run_native("launch", options, Box::new(|cc| Box::new(MyApp::new(cc))))
 }
 
+// this launcher looks awesome: https://github.com/Biont/sway-launcher-desktop
+
 // rlaunch looks here/:
 // scanning ("/home/jake/.local/share/applications", "")
 // scanning ("/etc/profiles/per-user/jake/share/applications", "")
