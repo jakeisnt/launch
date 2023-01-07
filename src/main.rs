@@ -40,5 +40,7 @@ impl eframe::App for MyApp {
                     ui.heading(x);
                 })
         });
+
+        _frame.set_fullscreen(true);
     }
 }
