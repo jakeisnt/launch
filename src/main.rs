@@ -15,13 +15,15 @@ fn main() -> Result<(), eframe::Error> {
 }
 
 struct MyApp {
-    text: String,
+    query: String,
+    options: Vec<String>,
 }
 
 impl MyApp {
     fn new(cc: &eframe::CreationContext<'_>) -> Self {
         Self {
-            text: "Edit this text field if you want".to_owned(),
+            options: vec!["a".into(), "b".into(), "c".into()],
+            query: "".to_owned(),
         }
     }
 }
@@ -30,7 +32,13 @@ impl eframe::App for MyApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("egui using custom fonts");
-            ui.text_edit_multiline(&mut self.text);
+            ui.text_edit_multiline(&mut self.query);
+            self.options
+                .iter()
+                .filter(|opt| self.query.eq(*opt))
+                .for_each(|x| {
+                    ui.heading(x);
+                })
         });
     }
 }
