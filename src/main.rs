@@ -86,13 +86,10 @@ fn build_root_widget() -> impl Widget<AppState> {
         }))
         .vertical()
         // AppState::items
-        .lens(druid::lens::Field::new(
-            |v: AppState| {
+        .lens(druid::lens::Field::new(|v: AppState| {
             let query: String = *v.query;
             v.items.iter().filter(|elem| elem.eq(&query)).collect()
-        },
-
-        ),
+        })),
         1.0,
     );
 
