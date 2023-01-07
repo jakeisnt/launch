@@ -24,8 +24,7 @@ use std::sync::Arc;
 
 use druid::widget::{Flex, Label, TextBox};
 use druid::{
-    AppLauncher, Color, Data, Env, Lens, LocalizedString, Menu, Widget, WidgetExt, WindowDesc,
-    WindowId,
+    AppLauncher, Color, Data, Env, Lens, LocalizedString, Widget, WidgetExt, WindowDesc, WindowId,
 };
 
 const WINDOW_TITLE: LocalizedString<AppState> = LocalizedString::new("Text Options");
@@ -48,10 +47,9 @@ pub fn main() {
     // describe the main window
     let main_window = WindowDesc::new(build_root_widget())
         .title(WINDOW_TITLE)
-        .menu(make_menu)
+        .window_size((400.0, 600.0))
         // TODO: How do we force the window to float?
-        .set_position((100.0, 100.0))
-        .window_size((400.0, 600.0));
+        .set_window_state(druid::WindowState::Restored);
 
     // create the initial app state
     let initial_state = AppState {
@@ -91,19 +89,4 @@ fn build_root_widget() -> impl Widget<AppState> {
             1.0,
         )
         .padding(8.0)
-}
-
-#[allow(unused_assignments, unused_mut)]
-fn make_menu<T: Data>(_window: Option<WindowId>, _data: &AppState, _env: &Env) -> Menu<T> {
-    let mut base = Menu::empty();
-    let mut base = base.entry(druid::platform_menus::win::file::default());
-    base.entry(
-        Menu::new(LocalizedString::new("common-menu-edit-menu"))
-            .entry(druid::platform_menus::common::undo())
-            .entry(druid::platform_menus::common::redo())
-            .separator()
-            .entry(druid::platform_menus::common::cut())
-            .entry(druid::platform_menus::common::copy())
-            .entry(druid::platform_menus::common::paste()),
-    )
 }
