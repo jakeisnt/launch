@@ -20,6 +20,7 @@ fn main() -> Result<(), eframe::Error> {
 // Finished reading all 29 applications (0.001078074s)
 
 // https://github.com/pop-os/freedesktop-desktop-entry/pull/5/files
+//   # https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
 
 struct MyApp {
     query: String,
