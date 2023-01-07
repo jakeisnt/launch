@@ -8,7 +8,7 @@ use fuzzy_matcher::FuzzyMatcher;
 use std::fs;
 use freedesktop_desktop_entry::{default_paths, DesktopEntry, Iter, PathSource};
 
-fn find_desktop_entries() -> &'static Vec<DesktopEntry<'static>> {
+fn find_desktop_entries() -> [DesktopEntry<'static>] {
     let mut entries: Vec<DesktopEntry> = vec![];
 
     for path in Iter::new(default_paths()) {
@@ -21,7 +21,7 @@ fn find_desktop_entries() -> &'static Vec<DesktopEntry<'static>> {
         }
     }
 
-    &entries
+    entries.into_slice()
 }
 
 fn main() -> Result<(), eframe::Error> {
@@ -47,7 +47,7 @@ fn main() -> Result<(), eframe::Error> {
 
 struct MyApp<'a> {
     query: String,
-    options: &Vec<DesktopEntry<'a>>,
+    options: &'a [DesktopEntry<'a>],
     matcher: SkimMatcherV2,
     idx: usize,
 }
@@ -56,7 +56,7 @@ impl<'a> MyApp<'a> {
     fn new(_cc: &eframe::CreationContext<'_>) -> Self {
         Self {
             // TODO: Get options by scanning .desktop files and reading their names
-            options: find_desktop_entries(),
+            options: &find_desktop_entries(),
             query: "".to_owned(),
             matcher: SkimMatcherV2::default(),
             idx: 0,
@@ -66,21 +66,16 @@ impl<'a> MyApp<'a> {
 
 impl<'a> eframe::App for MyApp<'a> {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        // iterator that owns its references ->
-        // this was likely the issue i was having before
-
         let opts: Vec<DesktopEntry<'a>> = self
-            // .to_owned()
             .options
-            .iter()
+            .into_iter()
             .filter(|entry| {
                 if let Some(name) = entry.name(None) {
                     return self.matcher.fuzzy_match(&name, &self.query).is_some();
                 }
                 return false;
             })
-            .collect::<DesktopEntry<'a>>()
-            .into();
+            .collect();
 
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.text_edit_singleline(&mut self.query).request_focus();
