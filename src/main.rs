@@ -11,6 +11,14 @@ fn main() -> Result<(), eframe::Error> {
     eframe::run_native("launch", options, Box::new(|cc| Box::new(MyApp::new(cc))))
 }
 
+// rlaunch looks here/:
+// scanning ("/home/jake/.local/share/applications", "")
+// scanning ("/etc/profiles/per-user/jake/share/applications", "")
+// scanning ("/run/current-system/sw/share/applications", "")
+// Finished reading all 29 applications (0.001078074s)
+
+// https://github.com/pop-os/freedesktop-desktop-entry/pull/5/files
+
 struct MyApp {
     query: String,
     options: Vec<String>,
