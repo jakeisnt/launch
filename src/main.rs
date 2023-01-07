@@ -31,23 +31,29 @@ impl MyApp {
 
 impl eframe::App for MyApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        // iterator that owns its references ->
+        // this was likely the issue i was having before
+
+        let opts: Vec<String> = self
+            .options
+            .to_owned()
+            .into_iter()
+            .filter(|opt| self.matcher.fuzzy_match(opt, &self.query).is_some())
+            .collect();
+
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.text_edit_singleline(&mut self.query).request_focus();
             ScrollArea::vertical()
                 .auto_shrink([false; 2])
                 .stick_to_bottom(true)
                 .show(ui, |ui| {
-                    self.options
-                        .iter()
-                        .filter(|opt| self.matcher.fuzzy_match(opt, &self.query).is_some())
-                        .enumerate()
-                        .for_each(|(i, x)| {
-                            if i == self.idx {
-                                ui.label(egui::RichText::new(x).underline());
-                            } else {
-                                ui.heading(x);
-                            }
-                        });
+                    &opts.iter().enumerate().for_each(|(i, x)| {
+                        if i == self.idx {
+                            ui.label(egui::RichText::new(x).underline());
+                        } else {
+                            ui.heading(x);
+                        }
+                    });
                 })
         });
 
@@ -60,14 +66,9 @@ impl eframe::App for MyApp {
         }
 
         if ctx.input().key_pressed(Key::Enter) {
+            // run the desired program
             panic!("{:?}", self.options[self.idx]);
         }
-
-        // idx starts at launching app 0.
-        // if the arrow keys go down, we select the next one
-        // if the arrow keys go up, we wrap to the previous
-        // if enter is pressed, run the current idx item
-        // otherwise, enter into the text box
 
         _frame.set_fullscreen(true);
     }
