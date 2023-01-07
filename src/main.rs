@@ -95,6 +95,7 @@ fn build_root_widget() -> impl Widget<AppState> {
                     .items
                     .iter()
                     .filter(|elem| (*elem).eq(&*v.query))
+                    .map(|e| e.into())
                     .collect();
 
                 ret
@@ -104,9 +105,10 @@ fn build_root_widget() -> impl Widget<AppState> {
                     .items
                     .iter()
                     .filter(|elem| (*elem).eq(&*v.query))
+                    .map(|e| e.as_mut().into())
                     .collect();
 
-                ret
+                &mut ret
             },
         )),
         1.0,
