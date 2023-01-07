@@ -33,6 +33,10 @@ const WINDOW_TITLE: LocalizedString<AppState> = LocalizedString::new("Text Optio
 struct AppState {
     multi: Arc<String>,
     single: Arc<String>,
+    // items to search through
+    items: Arc<Vec<String>>,
+    // cursor index
+    idx: u32,
 }
 
 pub fn main() {
@@ -47,6 +51,11 @@ pub fn main() {
     let initial_state = AppState {
         single: "".to_string().into(),
         multi: "".to_string().into(),
+        items: ["the", "quick", "brown", "fox"]
+            .map(|st| st.to_string())
+            .to_vec()
+            .into(),
+        idx: 0,
     };
 
     // start the application
@@ -60,9 +69,11 @@ fn build_root_widget() -> impl Widget<AppState> {
     let reflect: Label<Arc<String>> = Label::dynamic(|data, _| format!("{}", data));
 
     let child = TextBox::multiline()
-        .with_placeholder("Multi")
+        .with_placeholder("Search...")
         .lens(AppState::multi)
         .expand_width();
+
+    // let mut results = Flex::column().cross_axis_alignment(druid::widget::CrossAxisAlignment::Start);
 
     Flex::column()
         .cross_axis_alignment(druid::widget::CrossAxisAlignment::Start)
