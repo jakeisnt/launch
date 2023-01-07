@@ -57,12 +57,25 @@ impl eframe::App for MyApp {
                 })
         });
 
+        let len: usize = opts.len().try_into().unwrap();
+
+        self.idx = self.idx.min(len - 1);
+
         if ctx.input().key_pressed(Key::ArrowDown) {
-            self.idx += 1;
+            // TODO: wrapping trait?
+            if self.idx == len - 1 {
+                self.idx = 0;
+            } else {
+                self.idx += 1;
+            }
         }
 
         if ctx.input().key_pressed(Key::ArrowUp) {
-            self.idx -= 1;
+            if self.idx == 0 {
+                self.idx = len - 1;
+            } else {
+                self.idx -= 1;
+            }
         }
 
         if ctx.input().key_pressed(Key::Enter) {
