@@ -57,12 +57,11 @@ fn configure_text_styles(ctx: &egui::Context) {
 
 fn main() -> Result<(), eframe::Error> {
     let options = eframe::NativeOptions {
-        // Hide the OS-specific "chrome" around the window:
         decorated: false,
-        // To have rounded corners we need transparency:
-        transparent: true,
-        min_window_size: Some(egui::vec2(320.0, 100.0)),
-        initial_window_size: Some(egui::vec2(320.0, 240.0)),
+        // NOTE: These two should open a centered pop-up. They don't!
+        always_on_top: true,
+        centered: true,
+        // transparent: true,
         ..Default::default()
     };
 
