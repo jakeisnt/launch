@@ -1,75 +1,103 @@
 use eframe::egui;
 use egui::*;
+use freedesktop_desktop_entry::{default_paths, DesktopEntry, Iter};
 use fuzzy_matcher::skim::SkimMatcherV2;
 use fuzzy_matcher::FuzzyMatcher;
-
-// for desktop entry finding
-// Spec: https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
-use freedesktop_desktop_entry::{default_paths, DesktopEntry, Iter, PathSource};
-use std::{fs, path::PathBuf, ptr::null};
+use std::{fs, path::PathBuf};
 
 /// Find all of the desktop entries available on the current system.
-fn find_desktop_entries<'a>(entries: &'a mut Vec<DesktopEntry<'a>>) -> () {}
+fn find_desktop_entries() -> Vec<Entry> {
+    let mut entries: Vec<Entry> = vec![];
+
+    for path in Iter::new(default_paths()) {
+        if let Ok(bytes) = fs::read_to_string(&path) {
+            if let Ok(entry) = DesktopEntry::decode(&path.clone(), &bytes.clone()) {
+                match (entry.exec(), entry.name(None)) {
+                    (_, Some(name)) => {
+                        entries.push(Entry {
+                            path: path.to_owned(),
+                            name: name.as_ref().to_string(),
+                        });
+                    }
+                    (_, _) => {}
+                }
+            }
+        }
+    }
+
+    entries
+}
+
+#[inline]
+fn heading2() -> TextStyle {
+    TextStyle::Name("Heading2".into())
+}
+
+#[inline]
+fn heading3() -> TextStyle {
+    TextStyle::Name("ContextHeading".into())
+}
+
+fn configure_text_styles(ctx: &egui::Context) {
+    use FontFamily::{Monospace, Proportional};
+
+    let mut style = (*ctx.style()).clone();
+    style.text_styles = [
+        (TextStyle::Heading, FontId::new(25.0, Proportional)),
+        (heading2(), FontId::new(22.0, Proportional)),
+        (heading3(), FontId::new(19.0, Proportional)),
+        (TextStyle::Body, FontId::new(16.0, Proportional)),
+        (TextStyle::Monospace, FontId::new(12.0, Monospace)),
+        (TextStyle::Button, FontId::new(12.0, Proportional)),
+        (TextStyle::Small, FontId::new(8.0, Proportional)),
+    ]
+    .into();
+    ctx.set_style(style);
+}
 
 fn main() -> Result<(), eframe::Error> {
     let options = eframe::NativeOptions {
+        // Hide the OS-specific "chrome" around the window:
+        decorated: false,
+        // To have rounded corners we need transparency:
+        transparent: true,
+        min_window_size: Some(egui::vec2(320.0, 100.0)),
         initial_window_size: Some(egui::vec2(320.0, 240.0)),
         ..Default::default()
     };
-    eframe::run_native("launch", options, Box::new(|cc| Box::new(MyApp::new(cc))))
+
+    eframe::run_native("launch", options, Box::new(|cc| Box::new(Launch::new(cc))))
 }
 
-// let de = DesktopEntry::decode(path.as_path(), &input).expect("Error decoding desktop entry");
-// de.launch(&[]).expect("Failed to run desktop entry");
+#[derive(Debug, Clone)]
+struct Entry {
+    name: String,
+    path: PathBuf,
+}
 
-// this launcher looks awesome: https://github.com/Biont/sway-launcher-desktop
+impl Entry {
+    // Exec a program entry
+    fn exec(&self) {
+        let path = &self.path;
+        let input = fs::read_to_string(path.clone()).expect("Failed to read file");
+        let de =
+            DesktopEntry::decode(path.as_path(), &input).expect("Error decoding desktop entry");
+        de.launch(&[]).expect("Failed to run desktop entry");
+    }
+}
 
-// rlaunch looks here/:
-// scanning ("/home/jake/.local/share/applications", "")
-// scanning ("/etc/profiles/per-user/jake/share/applications", "")
-// scanning ("/run/current-system/sw/share/applications", "")
-// Finished reading all 29 applications (0.001078074s)
-
-// https://github.com/pop-os/freedesktop-desktop-entry/pull/5/files
-
-struct MyApp {
+struct Launch {
     query: String,
     options: Vec<Entry>,
     matcher: SkimMatcherV2,
     idx: usize,
 }
 
-#[derive(Debug, Clone)]
-struct Entry {
-    name: String,
-    // exec: String,
-    path: PathBuf,
-}
-
-impl MyApp {
+impl Launch {
     fn new(_cc: &eframe::CreationContext<'_>) -> Self {
-        let mut entries: Vec<Entry> = vec![];
-
-        for path in Iter::new(default_paths()) {
-            if let Ok(bytes) = fs::read_to_string(&path) {
-                if let Ok(entry) = DesktopEntry::decode(&path.clone(), &bytes.clone()) {
-                    match (entry.exec(), entry.name(None)) {
-                        (Some(exec), Some(name)) => {
-                            entries.push(Entry {
-                                path: path.to_owned(),
-                                // exec: exec.to_string(),
-                                name: name.as_ref().to_string(),
-                            });
-                        }
-                        (_, _) => {}
-                    }
-                }
-            }
-        }
-
+        configure_text_styles(&_cc.egui_ctx);
         Self {
-            // TODO: Get options by scanning .desktop files and reading their names
-            options: entries,
+            options: find_desktop_entries(),
             query: "".to_owned(),
             matcher: SkimMatcherV2::default(),
             idx: 0,
@@ -77,15 +105,30 @@ impl MyApp {
     }
 }
 
-// Exec a program entry
-fn exec_entry(e: &Entry) {
-    let path = &e.path;
-    let input = fs::read_to_string(e.path.clone()).expect("Failed to read file");
-    let de = DesktopEntry::decode(path.as_path(), &input).expect("Error decoding desktop entry");
-    de.launch(&[]).expect("Failed to run desktop entry");
+trait Wrap {
+    fn wrap_add(self, rhs: Self) -> Self;
+    fn wrap_sub(self, rhs: Self) -> Self;
 }
 
-impl eframe::App for MyApp {
+impl Wrap for usize {
+    fn wrap_add(self, rhs: Self) -> Self {
+        if self == rhs - 1 {
+            0
+        } else {
+            self.saturating_add(1)
+        }
+    }
+
+    fn wrap_sub(self, rhs: Self) -> Self {
+        if self == 0 {
+            rhs - 1
+        } else {
+            self.saturating_sub(1)
+        }
+    }
+}
+
+impl eframe::App for Launch {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         let opts: Vec<Entry> = self
             .options
@@ -102,33 +145,23 @@ impl eframe::App for MyApp {
                 .show(ui, |ui| {
                     opts.iter().enumerate().for_each(|(i, entry)| {
                         if i == self.idx {
-                            ui.label(egui::RichText::new(&entry.name).underline());
+                            ui.label(RichText::new(&entry.name).text_style(heading2()).strong());
                         } else {
-                            ui.heading(&entry.name);
+                            ui.label(RichText::new(&entry.name).text_style(heading2()));
                         }
                     });
-                })
+                });
         });
 
         let len: usize = opts.len().try_into().unwrap();
-
         self.idx = self.idx.min(len.saturating_sub(1));
 
         if ctx.input().key_pressed(Key::ArrowDown) {
-            // TODO: wrapping trait?
-            if self.idx == len - 1 {
-                self.idx = 0;
-            } else {
-                self.idx += 1;
-            }
+            self.idx = self.idx.wrap_add(len);
         }
 
         if ctx.input().key_pressed(Key::ArrowUp) {
-            if self.idx == 0 {
-                self.idx = len - 1;
-            } else {
-                self.idx -= 1;
-            }
+            self.idx = self.idx.wrap_sub(len);
         }
 
         if ctx.input().key_pressed(Key::Escape) {
@@ -137,7 +170,7 @@ impl eframe::App for MyApp {
 
         if ctx.input().key_pressed(Key::Enter) {
             if opts.len() > self.idx {
-                exec_entry(&opts[self.idx]);
+                opts[self.idx].exec();
             }
         }
     }
