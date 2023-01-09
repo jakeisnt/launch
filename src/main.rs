@@ -32,33 +32,34 @@ fn main() -> Result<(), eframe::Error> {
 
 // https://github.com/pop-os/freedesktop-desktop-entry/pull/5/files
 
-struct MyApp<'a> {
+struct MyApp {
     query: String,
-    options: Vec<Entry<'a>>,
+    options: Vec<Entry>,
     matcher: SkimMatcherV2,
     idx: usize,
 }
 
-struct Entry<'a> {
-    name: Option<&'a str>,
-    exec: &'a str,
+#[derive(Debug, Clone)]
+struct Entry {
+    name: String,
+    exec: String,
 }
 
-impl<'a> MyApp<'a> {
+impl MyApp {
     fn new(_cc: &eframe::CreationContext<'_>) -> Self {
         let mut entries: Vec<Entry> = vec![];
-
-        let mut strval: Vec<PathBuf> = vec![];
-        let mut contents: Vec<String> = vec![];
 
         for path in Iter::new(default_paths()) {
             if let Ok(bytes) = fs::read_to_string(&path) {
                 if let Ok(entry) = DesktopEntry::decode(&path.clone(), &bytes.clone()) {
-                    if let Some(exec) = entry.exec() {
-                        entries.push(Entry {
-                            exec,
-                            name: entry.name().map(|v| &v),
-                        })
+                    match (entry.exec(), entry.name(None)) {
+                        (Some(exec), Some(name)) => {
+                            entries.push(Entry {
+                                exec: exec.to_string(),
+                                name: name.as_ref().to_string(),
+                            });
+                        }
+                        (_, _) => {}
                     }
                 }
             }
@@ -74,18 +75,13 @@ impl<'a> MyApp<'a> {
     }
 }
 
-impl<'a> eframe::App for MyApp<'a> {
+impl eframe::App for MyApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        let opts: Vec<DesktopEntry<'a>> = self
+        let opts: Vec<Entry> = self
             .options
             .clone()
             .into_iter()
-            .filter(|entry| {
-                if let Some(name) = entry.name(None) {
-                    return self.matcher.fuzzy_match(&name, &self.query).is_some();
-                }
-                return false;
-            })
+            .filter(|entry| self.matcher.fuzzy_match(&entry.name, &self.query).is_some())
             .collect();
 
         egui::CentralPanel::default().show(ctx, |ui| {
@@ -95,12 +91,10 @@ impl<'a> eframe::App for MyApp<'a> {
                 .stick_to_bottom(true)
                 .show(ui, |ui| {
                     opts.iter().enumerate().for_each(|(i, entry)| {
-                        if let Some(name) = entry.name(None) {
-                            if i == self.idx {
-                                ui.label(egui::RichText::new(name).underline());
-                            } else {
-                                ui.heading(name);
-                            }
+                        if i == self.idx {
+                            ui.label(egui::RichText::new(&entry.name).underline());
+                        } else {
+                            ui.heading(&entry.name);
                         }
                     });
                 })
