@@ -6,15 +6,20 @@ use fuzzy_matcher::FuzzyMatcher;
 // for desktop entry finding
 // Spec: https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
 use freedesktop_desktop_entry::{default_paths, DesktopEntry, Iter, PathSource};
-use std::fs;
+use std::{fs, path::PathBuf, ptr::null};
 
-fn find_desktop_entries() -> Vec<DesktopEntry<'static>> {
-    let mut entries: Vec<DesktopEntry<'static>> = vec![];
+fn find_desktop_entries<'a>() -> Vec<DesktopEntry<'a>> {
+    let mut entries: Vec<DesktopEntry<'a>> = vec![];
+
+    let mut cur_p: Option<PathBuf> = None;
+    let mut cur_b: Option<String> = None;
 
     for path in Iter::new(default_paths()) {
         // let path_src = PathSource::guess_from(&path);
         if let Ok(bytes) = fs::read_to_string(&path) {
-            if let Ok(entry) = DesktopEntry::decode(&path, &bytes) {
+            cur_p = Some(path.clone());
+            cur_b = Some(bytes.clone());
+            if let Ok(entry) = DesktopEntry::decode(&cur_p.unwrap(), &cur_b.unwrap()) {
                 // println!("{:?}: {}\n---\n{}", path_src, path.display(), entry);
                 entries.push(entry)
             }
