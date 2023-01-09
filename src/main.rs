@@ -42,7 +42,8 @@ struct MyApp {
 #[derive(Debug, Clone)]
 struct Entry {
     name: String,
-    exec: String,
+    // exec: String,
+    path: PathBuf,
 }
 
 impl MyApp {
@@ -55,7 +56,8 @@ impl MyApp {
                     match (entry.exec(), entry.name(None)) {
                         (Some(exec), Some(name)) => {
                             entries.push(Entry {
-                                exec: exec.to_string(),
+                                path: path.to_owned(),
+                                // exec: exec.to_string(),
                                 name: name.as_ref().to_string(),
                             });
                         }
@@ -73,6 +75,13 @@ impl MyApp {
             idx: 0,
         }
     }
+}
+
+fn exec_entry(e: &Entry) {
+    let path = &e.path;
+    let input = fs::read_to_string(e.path.clone()).expect("Failed to read file");
+    let de = DesktopEntry::decode(path.as_path(), &input).expect("Error decoding desktop entry");
+    de.launch(&[]).expect("Failed to run desktop entry");
 }
 
 impl eframe::App for MyApp {
@@ -123,7 +132,8 @@ impl eframe::App for MyApp {
 
         if ctx.input().key_pressed(Key::Enter) {
             // run the desired program
-            panic!("{:?}", self.options[self.idx]);
+            exec_entry(&self.options[self.idx]);
+            // panic!("{:?}", self.options[self.idx]);
         }
 
         _frame.set_fullscreen(true);
