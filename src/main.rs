@@ -8,26 +8,8 @@ use fuzzy_matcher::FuzzyMatcher;
 use freedesktop_desktop_entry::{default_paths, DesktopEntry, Iter, PathSource};
 use std::{fs, path::PathBuf, ptr::null};
 
-fn find_desktop_entries<'a>() -> Vec<DesktopEntry<'a>> {
-    let mut entries: Vec<DesktopEntry<'a>> = vec![];
-
-    let mut cur_p: Option<PathBuf> = None;
-    let mut cur_b: Option<String> = None;
-
-    for path in Iter::new(default_paths()) {
-        // let path_src = PathSource::guess_from(&path);
-        if let Ok(bytes) = fs::read_to_string(&path) {
-            cur_p = Some(path.clone());
-            cur_b = Some(bytes.clone());
-            if let Ok(entry) = DesktopEntry::decode(&cur_p.unwrap(), &cur_b.unwrap()) {
-                // println!("{:?}: {}\n---\n{}", path_src, path.display(), entry);
-                entries.push(entry)
-            }
-        }
-    }
-
-    entries
-}
+/// Find all of the desktop entries available on the current system.
+fn find_desktop_entries<'a>(entries: &'a mut Vec<DesktopEntry<'a>>) -> () {}
 
 fn main() -> Result<(), eframe::Error> {
     let options = eframe::NativeOptions {
@@ -59,9 +41,28 @@ struct MyApp<'a> {
 
 impl<'a> MyApp<'a> {
     fn new(_cc: &eframe::CreationContext<'_>) -> Self {
+        let mut entries: Vec<DesktopEntry<'a>> = vec![];
+
+        let mut strval: Vec<PathBuf> = vec![];
+        let mut contents: Vec<String> = vec![];
+
+        for path in Iter::new(default_paths()) {
+            if let Ok(bytes) = fs::read_to_string(&path) {
+                strval.push(path);
+                contents.push(bytes);
+            }
+        }
+
+        for (path, bytes) in strval.iter().zip(contents) {
+            if let Ok(entry) = DesktopEntry::decode(&path, &bytes) {
+                entries.push(entry);
+            }
+        }
+        // find_desktop_entries(&mut entries);
+
         Self {
             // TODO: Get options by scanning .desktop files and reading their names
-            options: find_desktop_entries(),
+            options: entries,
             query: "".to_owned(),
             matcher: SkimMatcherV2::default(),
             idx: 0,
