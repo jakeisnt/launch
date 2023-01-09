@@ -5,11 +5,11 @@ use fuzzy_matcher::FuzzyMatcher;
 
 // for desktop entry finding
 // Spec: https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
-use std::fs;
 use freedesktop_desktop_entry::{default_paths, DesktopEntry, Iter, PathSource};
+use std::fs;
 
-fn find_desktop_entries() -> [DesktopEntry<'static>] {
-    let mut entries: Vec<DesktopEntry> = vec![];
+fn find_desktop_entries() -> Vec<DesktopEntry<'static>> {
+    let mut entries: Vec<DesktopEntry<'static>> = vec![];
 
     for path in Iter::new(default_paths()) {
         // let path_src = PathSource::guess_from(&path);
@@ -21,7 +21,7 @@ fn find_desktop_entries() -> [DesktopEntry<'static>] {
         }
     }
 
-    entries.into_slice()
+    entries
 }
 
 fn main() -> Result<(), eframe::Error> {
@@ -47,7 +47,7 @@ fn main() -> Result<(), eframe::Error> {
 
 struct MyApp<'a> {
     query: String,
-    options: &'a [DesktopEntry<'a>],
+    options: Vec<DesktopEntry<'a>>,
     matcher: SkimMatcherV2,
     idx: usize,
 }
@@ -56,7 +56,7 @@ impl<'a> MyApp<'a> {
     fn new(_cc: &eframe::CreationContext<'_>) -> Self {
         Self {
             // TODO: Get options by scanning .desktop files and reading their names
-            options: &find_desktop_entries(),
+            options: find_desktop_entries(),
             query: "".to_owned(),
             matcher: SkimMatcherV2::default(),
             idx: 0,
@@ -68,6 +68,7 @@ impl<'a> eframe::App for MyApp<'a> {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         let opts: Vec<DesktopEntry<'a>> = self
             .options
+            .clone()
             .into_iter()
             .filter(|entry| {
                 if let Some(name) = entry.name(None) {

@@ -364,9 +364,9 @@ dependencies = [
 
 [[package]]
 name = "clipboard-win"
-version = "4.4.2"
+version = "4.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c4ab1b92798304eedc095b53942963240037c0516452cb11aeba709d420b2219"
+checksum = "7191c27c2357d9b7ef96baac1773290d4ca63b24205b82a3fd8a0637afcf0362"
 dependencies = [
  "error-code",
  "str-buf",
@@ -688,7 +688,7 @@ dependencies = [
 [[package]]
 name = "ecolor"
 version = "0.20.0"
-source = "git+https://github.com/emilk/egui.git#34f587d1e1cc69146f7a02f20903e4f573030ffd"
+source = "git+https://github.com/emilk/egui.git#60b4f5e3fe00fe3f840374846dfd241817e6bf1e"
 dependencies = [
  "bytemuck",
 ]
@@ -696,7 +696,7 @@ dependencies = [
 [[package]]
 name = "eframe"
 version = "0.20.1"
-source = "git+https://github.com/emilk/egui.git#34f587d1e1cc69146f7a02f20903e4f573030ffd"
+source = "git+https://github.com/emilk/egui.git#60b4f5e3fe00fe3f840374846dfd241817e6bf1e"
 dependencies = [
  "bytemuck",
  "egui",
@@ -718,7 +718,7 @@ dependencies = [
 [[package]]
 name = "egui"
 version = "0.20.1"
-source = "git+https://github.com/emilk/egui.git#34f587d1e1cc69146f7a02f20903e4f573030ffd"
+source = "git+https://github.com/emilk/egui.git#60b4f5e3fe00fe3f840374846dfd241817e6bf1e"
 dependencies = [
  "accesskit",
  "ahash",
@@ -730,7 +730,7 @@ dependencies = [
 [[package]]
 name = "egui-winit"
 version = "0.20.1"
-source = "git+https://github.com/emilk/egui.git#34f587d1e1cc69146f7a02f20903e4f573030ffd"
+source = "git+https://github.com/emilk/egui.git#60b4f5e3fe00fe3f840374846dfd241817e6bf1e"
 dependencies = [
  "accesskit_winit",
  "arboard",
@@ -745,7 +745,7 @@ dependencies = [
 [[package]]
 name = "egui_glow"
 version = "0.20.1"
-source = "git+https://github.com/emilk/egui.git#34f587d1e1cc69146f7a02f20903e4f573030ffd"
+source = "git+https://github.com/emilk/egui.git#60b4f5e3fe00fe3f840374846dfd241817e6bf1e"
 dependencies = [
  "bytemuck",
  "egui",
@@ -759,7 +759,7 @@ dependencies = [
 [[package]]
 name = "emath"
 version = "0.20.0"
-source = "git+https://github.com/emilk/egui.git#34f587d1e1cc69146f7a02f20903e4f573030ffd"
+source = "git+https://github.com/emilk/egui.git#60b4f5e3fe00fe3f840374846dfd241817e6bf1e"
 dependencies = [
  "bytemuck",
 ]
@@ -809,7 +809,7 @@ dependencies = [
 [[package]]
 name = "epaint"
 version = "0.20.0"
-source = "git+https://github.com/emilk/egui.git#34f587d1e1cc69146f7a02f20903e4f573030ffd"
+source = "git+https://github.com/emilk/egui.git#60b4f5e3fe00fe3f840374846dfd241817e6bf1e"
 dependencies = [
  "ab_glyph",
  "ahash",
@@ -935,7 +935,7 @@ dependencies = [
 [[package]]
 name = "freedesktop-desktop-entry"
 version = "0.5.0"
-source = "git+https://github.com/jakeisnt/freedesktop-desktop-entry.git#5030452023e4d3fad4ecf4acc897e604f3ea43e2"
+source = "git+https://github.com/jakeisnt/freedesktop-desktop-entry.git#45e163e57ed57fe82c93439b1e0d10a0b743d30c"
 dependencies = [
  "dirs 3.0.2",
  "fork",
