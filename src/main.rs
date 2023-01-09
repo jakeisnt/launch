@@ -57,7 +57,7 @@ fn configure_text_styles(ctx: &egui::Context) {
 
 fn main() -> Result<(), eframe::Error> {
     let options = eframe::NativeOptions {
-        decorated: false,
+        // decorated: false,
         // NOTE: These two should open a centered pop-up. They don't!
         always_on_top: true,
         centered: true,
