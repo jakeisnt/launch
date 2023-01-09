@@ -77,6 +77,7 @@ impl MyApp {
     }
 }
 
+// Exec a program entry
 fn exec_entry(e: &Entry) {
     let path = &e.path;
     let input = fs::read_to_string(e.path.clone()).expect("Failed to read file");
@@ -111,7 +112,7 @@ impl eframe::App for MyApp {
 
         let len: usize = opts.len().try_into().unwrap();
 
-        self.idx = self.idx.min(len - 1);
+        self.idx = self.idx.min(len.saturating_sub(1));
 
         if ctx.input().key_pressed(Key::ArrowDown) {
             // TODO: wrapping trait?
@@ -130,12 +131,14 @@ impl eframe::App for MyApp {
             }
         }
 
-        if ctx.input().key_pressed(Key::Enter) {
-            // run the desired program
-            exec_entry(&self.options[self.idx]);
-            // panic!("{:?}", self.options[self.idx]);
+        if ctx.input().key_pressed(Key::Escape) {
+            std::process::exit(1);
         }
 
-        _frame.set_fullscreen(true);
+        if ctx.input().key_pressed(Key::Enter) {
+            if opts.len() > self.idx {
+                exec_entry(&opts[self.idx]);
+            }
+        }
     }
 }
