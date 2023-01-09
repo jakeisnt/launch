@@ -663,15 +663,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9ea835d29036a4087793836fa931b08837ad5e957da9e23886b29586fb9b6650"
 
 [[package]]
-name = "druid-example"
-version = "0.1.0"
-dependencies = [
- "eframe",
- "freedesktop-desktop-entry",
- "fuzzy-matcher",
-]
-
-[[package]]
 name = "dwrote"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1223,6 +1214,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7a53776d271cfb873b17c618af0298445c88afc52837f3e948fa3fafd131f449"
 dependencies = [
  "arrayvec 0.7.2",
+]
+
+[[package]]
+name = "launch"
+version = "0.1.0"
+dependencies = [
+ "eframe",
+ "freedesktop-desktop-entry",
+ "fuzzy-matcher",
 ]
 
 [[package]]

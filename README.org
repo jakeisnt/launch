@@ -1,0 +1,8 @@
+#+TITLE: Launch
+
+A simple program launcher.
+
+* Goals
+- Usable on desktop (MacOS, Linux) and web
+- Pluggable, easy to add commands
+- Usable on desktop

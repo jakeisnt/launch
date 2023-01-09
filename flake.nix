@@ -5,15 +5,6 @@
     rust-overlay.url = github:oxalica/rust-overlay;
     naersk.url       = github:nix-community/naersk;
 
-
-    # sample rust-skia build: https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/applications/editors/neovim/neovide/default.nix#L114
-    # rust-skia pulls skia from a hard-coded url by default (but flakes disallow internet access!),
-    # so we have to ask it to look for system libraries then build skia locally
-    # skia = {
-    #   url = github:rust-skia/skia;
-    #   flake = false;
-    # };
-
     # Used for shell.nix
     flake-compat = {
       url = github:edolstra/flake-compat;
@@ -23,8 +14,8 @@
 
   outputs = { self, nixpkgs, rust-overlay, utils, naersk, ... } @ inputs:
     let
-      name = "MFEKmetadata";
-      description = "Basic font metadata fetcher/updater for the MFEK project";
+      name = "launch";
+      description = "basic program launcher";
       overlays = [ rust-overlay.overlays.default ];
       # Our supported systems are the same supported systems as the Rust binaries
       systems = builtins.attrNames inputs.rust-overlay.packages;
@@ -53,7 +44,6 @@
           libXi
           mesa
 
-
           # just for gui lib?
           glib
           pango
@@ -70,7 +60,15 @@
         defaultPackage = naersk-lib.buildPackage {
           pname = name;
           root = ./.;
+
+          buildInputs = with pkgs; [
+            cmake
+            pkg-config
+            fontconfig
+            freetype
+          ] ++ xDeps;
         };
+
         devShells.default = pkgs.mkShell {
           inherit name description;
           buildInputs = with pkgs; [
@@ -87,8 +85,6 @@
             cmake
             # build and ship a wasm app
             trunk
-
-            # just for druid, i think
           ] ++ xDeps;
 
           RUST_BACKTRACE = "1";
