@@ -34,31 +34,35 @@ fn main() -> Result<(), eframe::Error> {
 
 struct MyApp<'a> {
     query: String,
-    options: Vec<DesktopEntry<'a>>,
+    options: Vec<Entry<'a>>,
     matcher: SkimMatcherV2,
     idx: usize,
 }
 
+struct Entry<'a> {
+    name: Option<&'a str>,
+    exec: &'a str,
+}
+
 impl<'a> MyApp<'a> {
     fn new(_cc: &eframe::CreationContext<'_>) -> Self {
-        let mut entries: Vec<DesktopEntry<'a>> = vec![];
+        let mut entries: Vec<Entry> = vec![];
 
         let mut strval: Vec<PathBuf> = vec![];
         let mut contents: Vec<String> = vec![];
 
         for path in Iter::new(default_paths()) {
             if let Ok(bytes) = fs::read_to_string(&path) {
-                strval.push(path);
-                contents.push(bytes);
+                if let Ok(entry) = DesktopEntry::decode(&path.clone(), &bytes.clone()) {
+                    if let Some(exec) = entry.exec() {
+                        entries.push(Entry {
+                            exec,
+                            name: entry.name().map(|v| &v),
+                        })
+                    }
+                }
             }
         }
-
-        for (path, bytes) in strval.iter().zip(contents) {
-            if let Ok(entry) = DesktopEntry::decode(&path, &bytes) {
-                entries.push(entry);
-            }
-        }
-        // find_desktop_entries(&mut entries);
 
         Self {
             // TODO: Get options by scanning .desktop files and reading their names
