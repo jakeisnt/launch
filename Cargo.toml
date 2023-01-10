@@ -7,5 +7,7 @@ edition = "2021"
 
 [dependencies]
 eframe = { git = "https://github.com/emilk/egui.git" }
+# egui = "0.20.1"
+# egui-winit = "0.20.1"
 freedesktop-desktop-entry = { git = "https://github.com/jakeisnt/freedesktop-desktop-entry.git" }
 fuzzy-matcher = "0.3.7"
