@@ -6,4 +6,3 @@ A simple program launcher.
 - Learn Rust GUI with `egui`
 - Usable on desktop (MacOS, Linux) and web
 - Pluggable, easy to add commands
-- Usable on desktop
