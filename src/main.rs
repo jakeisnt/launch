@@ -55,6 +55,7 @@ impl Entry {
         let de =
             DesktopEntry::decode(path.as_path(), &input).expect("Error decoding desktop entry");
         de.launch(&[]).expect("Failed to run desktop entry");
+        std::process::exit(1);
     }
 }
 
