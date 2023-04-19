@@ -69,7 +69,7 @@
           ] ++ xDeps;
         };
 
-        devShells.default = pkgs.mkShell {
+        devShells.default = pkgs.mkShell rec {
           inherit name description;
           buildInputs = with pkgs; [
             rust_channel
@@ -85,10 +85,13 @@
             cmake
             # build and ship a wasm app
             trunk
+
+            libstdcxx5
           ] ++ xDeps;
 
           RUST_BACKTRACE = "1";
-          LD_LIBRARY_PATH = "${pkgs.lib.makeLibraryPath (xDeps) }:$LD_LIBRARY_PATH";
+          LD_LIBRARY_PATH = nixpkgs.lib.makeLibraryPath buildInputs;
+          # "${pkgs.lib.makeLibraryPath (xDeps) }:$LD_LIBRARY_PATH";
           PKG_CONFIG_PATH = "${pkgs.lib.makeLibraryPath (xDeps) }:$PKG_CONFIG_PATH";
           # for rust-analyzer; the target dir of the compiler for the project
           OUT_DIR = "./target";
