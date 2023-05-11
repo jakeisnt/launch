@@ -29,16 +29,15 @@ fn find_desktop_entries() -> Vec<Entry> {
 }
 
 fn main() -> Result<(), eframe::Error> {
-    // let options = eframe::NativeOptions {
-    //     // decorated: false,
-    //     // NOTE: These two should open a centered pop-up. They don't!
-    //     // always_on_top: true,
-    //     // centered: true,
-    //     // transparent: true,
-    //     ..Default::default()
-    // };
-    //
-    let options = eframe::NativeOptions::default();
+    let options = eframe::NativeOptions {
+        initial_window_size: Some(egui::vec2(320.0, 240.0)),
+        always_on_top: true,
+        decorated: false,
+        centered: true,
+        resizable: false,
+        ..Default::default()
+    };
+
     eframe::run_native("launch", options, Box::new(|cc| Box::new(Launch::new(cc))))
 }
 
