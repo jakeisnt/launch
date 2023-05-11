@@ -19,9 +19,8 @@
       overlays = [ (import nixpkgs-mozilla) ];
     in utils.lib.eachDefaultSystem (system:
       let
+        system = "x86_64-linux";
         pkgs = import nixpkgs { inherit overlays system; };
-        # rust_channel = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
-
         toolchain = (pkgs.rustChannelOf {
           rustToolchain = ./rust-toolchain.toml;
           sha256 = "eMJethw5ZLrJHmoN2/l0bIyQjoTX1NsvalWSscTixpI=";
