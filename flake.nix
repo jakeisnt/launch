@@ -63,7 +63,7 @@
           vulkan-tools
         ];
       in {
-        defaultPackage = naersk'.buildPackage {
+        defaultPackage = naersk'.buildPackage rec {
           pname = name;
           root = ./.;
 
@@ -73,10 +73,17 @@
             fontconfig
             freetype
           ] ++ xDeps;
+
+          LD_LIBRARY_PATH = nixpkgs.lib.makeLibraryPath buildInputs;
+          # "${pkgs.lib.makeLibraryPath (xDeps) }:$LD_LIBRARY_PATH";
+          PKG_CONFIG_PATH = "${pkgs.lib.makeLibraryPath (xDeps) }:$PKG_CONFIG_PATH";
         };
 
         devShells.default = pkgs.mkShell rec {
           inherit name description;
+
+          # TODO: something is missing in `buildInputs` that is needed
+          # to make dynamic linking work in isolation. I don't know what.
           nativeBuildInputs = [ toolchain ];
           buildInputs = with pkgs; [
             # How do I use mold? https://discourse.nixos.org/t/using-mold-as-linker-prevents-libraries-from-being-found/18530/4
