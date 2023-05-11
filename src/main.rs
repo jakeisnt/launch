@@ -29,15 +29,16 @@ fn find_desktop_entries() -> Vec<Entry> {
 }
 
 fn main() -> Result<(), eframe::Error> {
-    let options = eframe::NativeOptions {
-        decorated: false,
-        // NOTE: These two should open a centered pop-up. They don't!
-        always_on_top: true,
-        centered: true,
-        // transparent: true,
-        ..Default::default()
-    };
-
+    // let options = eframe::NativeOptions {
+    //     // decorated: false,
+    //     // NOTE: These two should open a centered pop-up. They don't!
+    //     // always_on_top: true,
+    //     // centered: true,
+    //     // transparent: true,
+    //     ..Default::default()
+    // };
+    //
+    let options = eframe::NativeOptions::default();
     eframe::run_native("launch", options, Box::new(|cc| Box::new(Launch::new(cc))))
 }
 
@@ -128,19 +129,19 @@ impl eframe::App for Launch {
         let len: usize = opts.len().try_into().unwrap();
         self.idx = self.idx.min(len.saturating_sub(1));
 
-        if ctx.input().key_pressed(Key::ArrowDown) {
+        if ctx.input(|i| i.key_pressed(Key::ArrowDown)) {
             self.idx = self.idx.wrap_add(len);
         }
 
-        if ctx.input().key_pressed(Key::ArrowUp) {
+        if ctx.input(|i| i.key_pressed(Key::ArrowUp)) {
             self.idx = self.idx.wrap_sub(len);
         }
 
-        if ctx.input().key_pressed(Key::Escape) {
+        if ctx.input(|i| i.key_pressed(Key::Escape)) {
             std::process::exit(1);
         }
 
-        if ctx.input().key_pressed(Key::Enter) {
+        if ctx.input(|i| i.key_pressed(Key::Enter)) {
             if opts.len() > self.idx {
                 opts[self.idx].exec();
             }
