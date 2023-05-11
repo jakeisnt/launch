@@ -1,9 +1,9 @@
 {
   inputs = {
-    nixpkgs.url      = github:nixos/nixpkgs/release-22.05;
-    utils.url        = github:numtide/flake-utils;
-    rust-overlay.url = github:oxalica/rust-overlay;
-    naersk.url       = github:nix-community/naersk;
+    nixpkgs.url         = github:nixos/nixpkgs/release-22.05;
+    utils.url           = github:numtide/flake-utils;
+    nixpkgs-mozilla.url = github:mozilla/nixpkgs-mozilla;
+    naersk.url          = github:nix-community/naersk;
 
     # Used for shell.nix
     flake-compat = {
@@ -12,21 +12,28 @@
     };
   };
 
-  outputs = { self, nixpkgs, rust-overlay, utils, naersk, ... } @ inputs:
+  outputs = { self, nixpkgs, nixpkgs-mozilla, utils, naersk, ... } @ inputs:
     let
       name = "launch";
       description = "basic program launcher";
-      overlays = [ rust-overlay.overlays.default ];
-      # Our supported systems are the same supported systems as the Rust binaries
-      systems = builtins.attrNames inputs.rust-overlay.packages;
-    in utils.lib.eachSystem systems (system:
+      overlays = [ (import nixpkgs-mozilla) ];
+    in utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit overlays system; };
-        rust_channel = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
-        naersk-lib = naersk.lib."${system}".override {
-          cargo = rust_channel;
-          rustc = rust_channel;
+        # rust_channel = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
+
+        toolchain = (pkgs.rustChannelOf {
+          rustToolchain = ./rust-toolchain.toml;
+          sha256 = "eMJethw5ZLrJHmoN2/l0bIyQjoTX1NsvalWSscTixpI=";
+          #        ^ After you run `nix build`, replace this with the actual
+          #          hash from the error message
+        }).rust;
+
+        naersk' = pkgs.callPackage naersk {
+          cargo = toolchain;
+          rustc = toolchain;
         };
+
         xDeps = with pkgs; with xorg; [
           xorgserver
 
@@ -57,7 +64,7 @@
           vulkan-tools
         ];
       in {
-        defaultPackage = naersk-lib.buildPackage {
+        defaultPackage = naersk'.buildPackage {
           pname = name;
           root = ./.;
 
@@ -71,11 +78,8 @@
 
         devShells.default = pkgs.mkShell rec {
           inherit name description;
+          nativeBuildInputs = [ toolchain ];
           buildInputs = with pkgs; [
-            rust_channel
-            rust-analyzer
-            cargo
-            # lld
             # How do I use mold? https://discourse.nixos.org/t/using-mold-as-linker-prevents-libraries-from-being-found/18530/4
             llvmPackages.bintools
             pkg-config
