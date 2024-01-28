@@ -19,7 +19,6 @@
       overlays = [ (import nixpkgs-mozilla) ];
     in utils.lib.eachDefaultSystem (system:
       let
-        system = "x86_64-linux";
         pkgs = import nixpkgs { inherit overlays system; };
         toolchain = (pkgs.rustChannelOf {
           rustToolchain = ./rust-toolchain.toml;
@@ -61,7 +60,11 @@
 
           # support executing gpu-supported programs
           vulkan-tools
+
+          libstdcxx5
         ];
+
+	macDeps = with pkgs; [ ];
       in {
         defaultPackage = naersk'.buildPackage rec {
           pname = name;
@@ -72,7 +75,7 @@
             pkg-config
             fontconfig
             freetype
-          ] ++ xDeps;
+          ] ++ (if system == "aarch64-darwin" then macDeps else xDeps);
 
           LD_LIBRARY_PATH = nixpkgs.lib.makeLibraryPath buildInputs;
           # "${pkgs.lib.makeLibraryPath (xDeps) }:$LD_LIBRARY_PATH";
@@ -96,8 +99,7 @@
             # build and ship a wasm app
             trunk
 
-            libstdcxx5
-          ] ++ xDeps;
+          ] ++ (if system == "aarch64-darwin" then macDeps else xDeps);
 
           RUST_BACKTRACE = "1";
           LD_LIBRARY_PATH = nixpkgs.lib.makeLibraryPath buildInputs;
